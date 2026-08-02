@@ -30,13 +30,13 @@
     "react-image-crop": "^11.1.2",
     "react-pdf": "^10.4.1",
     "react-read-pdf": "^2.0.9",
-    "react-simple-image-viewer": "^1.2.2",
     "react-toastify": "^11.1.0",
     "rsuite": "^6.2.2",
     "swiper": "^14.0.6",
     "typed.js": "^3.0.0",
     "uuid": "^14.0.1",
-    "xlsx": "^0.18.5"
+    "xlsx": "^0.18.5",
+    "yet-another-react-lightbox": "^3.32.2"
   },
   "devDependencies": {
     "@types/node": "^20",
