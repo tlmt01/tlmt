@@ -56,7 +56,7 @@ export default function RootLayout({
       >
         <GlobalContextProvider>
           <Navbar />
-          <div className="my-3">{children}</div>
+          <div>{children}</div>
           <ToastContainer
             position="top-right"
             autoClose={1500}

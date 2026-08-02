@@ -3,19 +3,24 @@ import React from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { deleteAllCookies } from "../modules/encryption";
-import { emptyUser, initialSessionState, useGlobalContext } from "../context/Store";
+import {
+  emptyUser,
+  initialSessionState,
+  useGlobalContext,
+} from "../context/Store";
 import logo from "../images/tlmt.jpg";
 
 const navItems = [
-  { label: "Home", href: "#home" },
-  { label: "Services", href: "#services" },
-  { label: "Gallery", href: "#gallery" },
-  { label: "Contact", href: "#contact" },
+  { label: "Home", href: "/" },
+  { label: "Services", href: "/services" },
+  { label: "Gallery", href: "/gallery" },
+  { label: "Contact", href: "/contact" },
 ];
 
 export default function Navbar() {
   const router = useRouter();
-  const { state, USER, setState, setUSER, setStateArray, setStateObject } = useGlobalContext();
+  const { state, USER, setState, setUSER, setStateArray, setStateObject } =
+    useGlobalContext();
   const isLoggedIn = Boolean(state?.loggedIn && USER?.phone);
   const displayName = USER?.name?.trim().split(" ")[0] || "Account";
 
@@ -31,16 +36,13 @@ export default function Navbar() {
   return (
     <nav className="navbar navbar-expand-lg tlmt-navbar sticky-top shadow-sm">
       <div className="container">
-        <a
-          className="navbar-brand d-flex align-items-center gap-3"
-          href="#home"
-        >
+        <a className="navbar-brand d-flex align-items-center gap-3" href="/">
           <div className="tlmt-logo-wrapper rounded-circle overflow-hidden border border-2 border-warning shadow-sm">
             <Image
               src={logo}
               alt="The Little Mango Tree logo"
-              width={58}
-              height={58}
+              width={50}
+              height={50}
               priority
               className="tlmt-logo"
             />
@@ -52,7 +54,6 @@ export default function Navbar() {
             </small>
           </div>
         </a>
-
         <button
           className="navbar-toggler border-0"
           type="button"
@@ -64,7 +65,6 @@ export default function Navbar() {
         >
           <span className="navbar-toggler-icon"></span>
         </button>
-
         <div className="collapse navbar-collapse" id="tlmtNavbar">
           <ul className="navbar-nav ms-auto align-items-lg-center gap-lg-2">
             {navItems.map((item) => (
@@ -74,14 +74,51 @@ export default function Navbar() {
                 </a>
               </li>
             ))}
-            {isLoggedIn ? <>
-              <li className="nav-item"><a className="nav-link px-3 py-2 rounded-pill" href="/dashboard"><i className="bi bi-grid-1x2 me-2" />Dashboard</a></li>
-              <li className="nav-item ms-lg-2"><span className="nav-link px-3 py-2"><i className="bi bi-person-circle me-2" />Hi, {displayName}</span></li>
-              <li className="nav-item"><button type="button" onClick={logout} className="btn btn-outline-danger rounded-pill px-3"><i className="bi bi-box-arrow-right me-2" />Logout</button></li>
-            </> : <>
-              <li className="nav-item"><a className="nav-link px-3 py-2 rounded-pill" href="/login">Login</a></li>
-              <li className="nav-item ms-lg-2"><a className="btn btn-outline-dark rounded-pill px-3" href="#contact"><i className="bi bi-calendar-check me-2"></i>Appointment</a></li>
-            </>}
+            {isLoggedIn ? (
+              <>
+                <li className="nav-item">
+                  <a
+                    className="nav-link px-3 py-2 rounded-pill"
+                    href="/dashboard"
+                  >
+                    <i className="bi bi-grid-1x2 me-2" />
+                    Dashboard
+                  </a>
+                </li>
+                <li className="nav-item ms-lg-2">
+                  <span className="nav-link px-3 py-2">
+                    <i className="bi bi-person-circle me-2" />
+                    Hi, {displayName}
+                  </span>
+                </li>
+                <li className="nav-item">
+                  <button
+                    type="button"
+                    onClick={logout}
+                    className="btn btn-outline-danger rounded-pill px-3"
+                  >
+                    <i className="bi bi-box-arrow-right me-2" />
+                    Logout
+                  </button>
+                </li>
+              </>
+            ) : (
+              <>
+                <li className="nav-item">
+                  <a className="nav-link px-3 py-2 rounded-pill" href="/login">
+                    Login
+                  </a>
+                </li>
+                <li className="nav-item ms-lg-2">
+                  <a
+                    className="btn btn-outline-dark rounded-pill px-3"
+                    href="#contact"
+                  >
+                    <i className="bi bi-calendar-check me-2"></i>Appointment
+                  </a>
+                </li>
+              </>
+            )}
           </ul>
         </div>
       </div>

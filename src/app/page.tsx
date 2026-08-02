@@ -1,7 +1,18 @@
 "use client";
 import Image from "next/image";
 import logo from "@/images/tlmt.jpg";
+import { useRouter } from "next/navigation";
 export default function HomePage() {
+  const router = useRouter();
+  const handleBookAppointment = () => {
+    router.push("/contact");
+  };
+  const handleExploreCollection = () => {
+    router.push("/collection");
+  };
+  const handleBookNow = () => {
+    router.push("/contact");
+  };
   return (
     <>
       {/* Hero Section */}
@@ -35,11 +46,17 @@ export default function HomePage() {
               </p>
 
               <div className="d-flex flex-wrap gap-3 justify-content-center justify-content-lg-start">
-                <button className="btn btn-danger btn-lg rounded-pill px-4 shadow">
+                <button
+                  className="btn btn-danger btn-lg rounded-pill px-4 shadow"
+                  onClick={handleBookAppointment}
+                >
                   Book Appointment
                 </button>
 
-                <button className="btn btn-outline-dark btn-lg rounded-pill px-4">
+                <button
+                  className="btn btn-outline-dark btn-lg rounded-pill px-4"
+                  onClick={handleExploreCollection}
+                >
                   Explore Collection
                 </button>
               </div>
@@ -224,7 +241,10 @@ export default function HomePage() {
             Book your appointment today and experience premium tailoring.
           </p>
 
-          <button className="btn btn-light btn-lg rounded-pill px-5">
+          <button
+            className="btn btn-light btn-lg rounded-pill px-5"
+            onClick={handleBookNow}
+          >
             Book Now
           </button>
         </div>

@@ -29,7 +29,7 @@ input[type="number"] {
 
 /* Handle */
 ::-webkit-scrollbar-thumb {
-  background: rgb(0, 58, 124);
+  background: rgb(0, 50, 124);
   border-radius: 5px;
 }
 
@@ -253,8 +253,8 @@ td {
 }
 
 .tlmt-logo-wrapper {
-  width: 58px;
-  height: 58px;
+  width: 50px;
+  height: 50px;
   background: #ffffff;
 }
 
@@ -264,7 +264,7 @@ td {
 
 .tlmt-brand-name {
   font-family: var(--font-algerian);
-  font-size: 1.05rem;
+  font-size: 0.9rem;
   color: #8b3d00;
   line-height: 1.1;
   letter-spacing: 0.03em;
@@ -274,6 +274,7 @@ td {
   font-family: var(--font-timesNewRoman);
   color: #5a4a3d;
   letter-spacing: 0.03em;
+  font-size: 0.9rem;
 }
 
 .tlmt-navbar .nav-link {
