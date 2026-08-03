@@ -28,6 +28,7 @@ function RegisterPageContent() {
   const widgetId = process.env.NEXT_PUBLIC_MSG91_WIDGET_ID;
   const authToken = process.env.NEXT_PUBLIC_MSG91_AUTH_TOKEN;
   const [name, setName] = useState("");
+  const [address, setAddress] = useState("");
   const [phone, setPhone] = useState(() =>
     (searchParams.get("phone") || "").replace(/\D/g, "").slice(-10),
   );
@@ -268,6 +269,10 @@ function RegisterPageContent() {
       toast.error("Please verify your email address before registering.");
       return;
     }
+    if (!address.trim()) {
+      toast.error("Please enter your address.");
+      return;
+    }
     setDisplayLoader(true);
     try {
       let uploadedUrl = url;
@@ -299,6 +304,7 @@ function RegisterPageContent() {
         photoName: uploadedPhotoName,
         customerID,
         url: uploadedUrl,
+        address,
       });
       toast.success(
         "Your profile is ready. Please verify your number to sign in.",
@@ -574,6 +580,23 @@ function RegisterPageContent() {
                 </button>
               </div>
             )}
+            <label className={styles.fieldLabel} htmlFor="register-name">
+              YOUR ADDRESS
+            </label>
+            <div className={styles.inputShell}>
+              <i className="bi bi-house-add-fill" />
+              <input
+                id="register-address"
+                type="text"
+                value={address}
+                onChange={(event) =>
+                  setAddress(event.target.value.toUpperCase())
+                }
+                placeholder="Enter your full address"
+                autoComplete="address"
+                required
+              />
+            </div>
             <button
               type="submit"
               className={styles.primaryButton}

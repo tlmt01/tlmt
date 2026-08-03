@@ -127,6 +127,266 @@ option {
 
 body {
   font-size: 14px;
+  background: #fffaf8;
+}
+
+.services-page {
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(255, 199, 220, 0.65),
+      transparent 18%
+    ),
+    linear-gradient(180deg, #fffaf8 0%, #fff6fb 100%);
+}
+
+.services-hero {
+  padding: 72px 0 56px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 240, 247, 0.9),
+    rgba(255, 250, 252, 1)
+  );
+}
+
+.services-title {
+  font-size: clamp(2.4rem, 5vw, 4.2rem);
+  font-weight: 800;
+  line-height: 1.05;
+  color: #ab0f56;
+  margin-bottom: 18px;
+}
+
+.services-copy {
+  max-width: 620px;
+  font-size: 1.05rem;
+  color: #5a5a68;
+  line-height: 1.8;
+}
+
+.services-eyebrow {
+  display: inline-block;
+  padding: 0.45rem 0.9rem;
+  margin-bottom: 1rem;
+  border-radius: 999px;
+  background: rgba(179, 0, 89, 0.12);
+  color: #b30059;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.services-hero-card,
+.service-card,
+.services-step-card,
+.services-cta-card {
+  border: 1px solid rgba(179, 0, 89, 0.08);
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 16px 42px rgba(120, 18, 64, 0.08);
+}
+
+.services-hero-card {
+  border-radius: 28px;
+  padding: 24px;
+}
+
+.services-highlight-card {
+  border-radius: 22px;
+  background: linear-gradient(180deg, #ffffff, #fff7fa);
+  padding: 18px;
+  height: 100%;
+  border: 1px solid rgba(181, 2, 84, 0.08);
+}
+
+.services-icon-circle {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 1.5rem;
+  background: linear-gradient(135deg, #ffe3f0, #fff7fb);
+}
+
+.services-pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.45rem 0.8rem;
+  background: rgba(42, 90, 170, 0.12);
+  color: #1f4a7e;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.service-card {
+  border-radius: 24px;
+  padding: 24px;
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    border-color 0.25s ease;
+}
+
+.service-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(179, 0, 89, 0.28);
+  box-shadow: 0 22px 48px rgba(120, 18, 64, 0.15);
+}
+
+.service-card-icon {
+  width: 62px;
+  height: 62px;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #ffdce8, #fff7fb);
+  font-size: 1.8rem;
+  margin-bottom: 16px;
+}
+
+.services-process-section {
+  padding: 44px 0 72px;
+  background: linear-gradient(180deg, #fffaf8, #fff4f7);
+}
+
+.services-step-card {
+  border-radius: 24px;
+  padding: 24px 18px;
+}
+
+.services-step-badge {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #b30059, #dc3f89);
+  color: #fff;
+  font-weight: 800;
+  margin: 0 auto;
+  box-shadow: 0 10px 24px rgba(179, 0, 89, 0.28);
+}
+
+.services-cta-card {
+  border-radius: 30px;
+  padding: 36px 24px;
+}
+
+.admin-users-page {
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(255, 222, 229, 0.9),
+      transparent 20%
+    ),
+    linear-gradient(180deg, #fffaf8 0%, #fff7fb 100%);
+}
+
+.admin-page-header {
+  padding: 12px 0 4px;
+}
+
+.admin-list-card,
+.admin-form-card {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(179, 0, 89, 0.08);
+  border-radius: 26px;
+  box-shadow: 0 18px 44px rgba(114, 19, 53, 0.08);
+  padding: 22px;
+}
+
+.admin-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.admin-stat-box {
+  border-radius: 18px;
+  background: linear-gradient(135deg, #fff4f8, #ffffff);
+  padding: 14px;
+  text-align: center;
+  border: 1px solid rgba(179, 0, 89, 0.08);
+}
+
+.admin-stat-box span {
+  display: block;
+  font-size: 0.72rem;
+  color: #7a7a85;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.admin-stat-box strong {
+  font-size: 1.1rem;
+  color: #a40056;
+}
+
+.admin-user-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 560px;
+  overflow: auto;
+}
+
+.admin-user-item {
+  width: 100%;
+  text-align: left;
+  border: 1px solid rgba(179, 0, 89, 0.1);
+  background: #fff;
+  border-radius: 18px;
+  padding: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  transition: 0.2s ease;
+}
+
+.admin-user-item.active,
+.admin-user-item:hover {
+  background: #fff4f8;
+  border-color: rgba(179, 0, 89, 0.35);
+}
+
+.gallery-page {
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(255, 219, 233, 0.8),
+      transparent 24%
+    ),
+    linear-gradient(180deg, #fffaf9 0%, #fff6fb 100%);
+}
+
+.gallery-hero {
+  padding: 72px 0 48px;
+}
+
+.upload-panel {
+  border-radius: 28px;
+  padding: 24px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 18px 45px rgba(117, 17, 52, 0.1);
+  border: 1px solid rgba(179, 0, 89, 0.08);
+}
+
+.gallery-card {
+  border-radius: 24px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 16px 40px rgba(120, 18, 64, 0.08);
+  border: 1px solid rgba(179, 0, 89, 0.08);
+}
+
+.gallery-image {
+  width: 100%;
+  height: 280px;
+  object-fit: cover;
+  display: block;
 }
 
 /* @import url("https://fonts.googleapis.com/css2?family=Tiro+Bangla&display=swap");

@@ -10,19 +10,19 @@ const shortcuts = [
     icon: "bi-calendar2-check",
     title: "Book an appointment",
     text: "Find a time that suits you.",
-    href: "/#contact",
+    href: "/contact",
   },
   {
     icon: "bi-grid-3x3-gap",
     title: "Explore services",
     text: "Discover what feels like you.",
-    href: "/#services",
+    href: "/services",
   },
   {
     icon: "bi-images",
     title: "View the gallery",
     text: "Save inspiration for later.",
-    href: "/#gallery",
+    href: "/gallery",
   },
 ];
 
@@ -30,14 +30,28 @@ export default function DashboardPage() {
   const { USER } = useGlobalContext();
   const name = USER?.name?.trim() || "there";
   const firstName = name.split(" ")[0];
-  const mobile = USER?.phone ? `+91 ${USER.phone.slice(0, 5)} ${USER.phone.slice(5)}` : "Add a mobile number";
+  const mobile = USER?.phone
+    ? `+91 ${USER.phone.slice(0, 5)} ${USER.phone.slice(5)}`
+    : "Add a mobile number";
   const profileNeeds = [
     USER?.phone
       ? { icon: "bi-phone-vibrate", title: "Mobile verified", text: mobile }
-      : { icon: "bi-phone", title: "Keep your profile current", text: "Add a mobile number for updates." },
+      : {
+          icon: "bi-phone",
+          title: "Keep your profile current",
+          text: "Add a mobile number for updates.",
+        },
     USER?.email
-      ? { icon: "bi-envelope-check", title: "Updates are ready", text: USER.email }
-      : { icon: "bi-envelope", title: "Stay in the loop", text: "Add an email for appointment updates." },
+      ? {
+          icon: "bi-envelope-check",
+          title: "Updates are ready",
+          text: USER.email,
+        }
+      : {
+          icon: "bi-envelope",
+          title: "Stay in the loop",
+          text: "Add an email for appointment updates.",
+        },
   ];
 
   return (
@@ -54,7 +68,7 @@ export default function DashboardPage() {
             Everything you love about your style journey, gathered in one
             beautiful place.
           </p>
-          <Link href="/#contact" className={styles.primaryAction}>
+          <Link href="/contact" className={styles.primaryAction}>
             Book an appointment <i className="bi bi-arrow-right" />
           </Link>
         </div>
@@ -68,11 +82,26 @@ export default function DashboardPage() {
         <div className={styles.profileBar}>
           {USER?.url ? (
             <div className={styles.profilePhoto}>
-              <Image src={USER.url} alt={`${name}'s profile photo`} fill sizes="52px" />
+              <Image
+                src={USER.url}
+                alt={`${name}'s profile photo`}
+                fill
+                sizes="52px"
+              />
             </div>
-          ) : <div className={styles.avatar} aria-hidden="true">{firstName.charAt(0).toUpperCase()}</div>}
-          <div><span>YOUR PROFILE</span><strong>{name}</strong></div>
-          <span className={styles.memberBadge}><i className="bi bi-heart-fill" /> {USER?.userType || "Style"} member</span>
+          ) : (
+            <div className={styles.avatar} aria-hidden="true">
+              {firstName.charAt(0).toUpperCase()}
+            </div>
+          )}
+          <div>
+            <span>YOUR PROFILE</span>
+            <strong>{name}</strong>
+          </div>
+          <span className={styles.memberBadge}>
+            <i className="bi bi-heart-fill" /> {USER?.userType || "Style"}{" "}
+            member
+          </span>
         </div>
         <div className={styles.sectionHeading}>
           <div>
@@ -103,7 +132,10 @@ export default function DashboardPage() {
           {profileNeeds.map((need) => (
             <div className={styles.need} key={need.title}>
               <i className={`bi ${need.icon}`} />
-              <div><span>{need.title}</span><strong>{need.text}</strong></div>
+              <div>
+                <span>{need.title}</span>
+                <strong>{need.text}</strong>
+              </div>
             </div>
           ))}
         </div>

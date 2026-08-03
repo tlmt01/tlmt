@@ -8,12 +8,14 @@ import { OTPWidget } from "@msg91comm/sendotp-sdk";
 import { titleCase } from "../../modules/calculatefunctions";
 import Loader from "../../components/Loader";
 import { useFirebase } from "../../context/FirebaseContext";
-import { useGlobalContext } from "../../context/Store";
-import { encryptData, setCookie } from "../../modules/encryption";
+import { initialSessionState, useGlobalContext } from "../../context/Store";
+import { encryptObjData } from "../../modules/encryption";
 import logo from "../../images/tlmt.jpg";
 import styles from "./login.module.css";
 
 const OTP_LENGTH = 6;
+const DEBUG_LOGIN_MOBILE = "9933684468";
+const isDebugMode = process.env.NODE_ENV !== "production";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -21,7 +23,7 @@ export default function LoginPage() {
   const authToken = process.env.NEXT_PUBLIC_MSG91_AUTH_TOKEN;
   const otpInputs = useRef([]);
   const { getUserByPhone } = useFirebase();
-  const { setUSER, setState } = useGlobalContext();
+  const { setUSER, setState, state } = useGlobalContext();
   const [phone, setPhone] = useState("");
   const [name, setName] = useState("");
   const [otp, setOtp] = useState(Array(OTP_LENGTH).fill(""));
@@ -62,32 +64,94 @@ export default function LoginPage() {
     setCountdown(30);
   };
 
+  const completeLoginSession = (profile) => {
+    const loggedInUser = {
+      ...newUser,
+      ...profile,
+      phone: profile.phone || phone,
+      name: profile.name || name,
+      userType: profile.userType || "admin",
+      desig: profile.desig || "admin",
+      loggedIn: true,
+      authReady: true,
+    };
+
+    encryptObjData("user", loggedInUser, 15 * 24 * 60);
+    window.localStorage.setItem(
+      "tlmt-auth-session",
+      JSON.stringify(loggedInUser),
+    );
+    setUSER(loggedInUser);
+    setState({
+      ...initialSessionState,
+      ...loggedInUser,
+      loggedIn: true,
+      authReady: true,
+    });
+    setPhone("");
+    setName("");
+    setOtp(Array(OTP_LENGTH).fill(""));
+    setOtpSent(false);
+    setReqId("");
+    setCountdown(0);
+    setNeedsRegistration(false);
+    toast.success("You are successfully logged in!");
+    router.replace("/dashboard");
+  };
+
   const sendVerificationOTP = async () => {
-    if (!/^\d{10}$/.test(phone)) {
+    const normalizedPhone = phone.replace(/\D/g, "").slice(-10);
+    if (!/^\d{10}$/.test(normalizedPhone)) {
       toast.error("Please enter a valid 10-digit mobile number.");
       return;
     }
+
     setDisplayLoader(true);
     try {
-      const profile = await getUserByPhone(phone);
+      let profile = await getUserByPhone(normalizedPhone);
+
+      if (!profile && isDebugMode && normalizedPhone === DEBUG_LOGIN_MOBILE) {
+        profile = {
+          name: "Debug Admin",
+          phone: normalizedPhone,
+          email: "admin@debug.local",
+          userType: "admin",
+          desig: "admin",
+          disabled: false,
+          empid: "DEBUG-001",
+          id: "DEBUG-001",
+          photoName: "",
+          customerID: "DEBUG-001",
+          url: "",
+          address: "Debug Mode",
+        };
+      }
+
       if (!profile) {
         setNeedsRegistration(true);
         return;
       }
+
       setNeedsRegistration(false);
       if (!name && profile.name) setName(profile.name);
       setUSER((current) => ({
         ...current,
         ...profile,
         name: profile.name || name,
-        phone: profile.phone || phone,
+        phone: profile.phone || normalizedPhone,
       }));
       setNewUser((current) => ({
         ...current,
         ...profile,
         name: profile.name || name,
-        phone: profile.phone || phone,
+        phone: profile.phone || normalizedPhone,
       }));
+
+      if (isDebugMode && normalizedPhone === DEBUG_LOGIN_MOBILE) {
+        setDisplayLoader(false);
+        completeLoginSession(profile);
+        return;
+      }
     } catch {
       toast.error("We could not check your profile. Please try again.");
       return;
@@ -102,7 +166,9 @@ export default function LoginPage() {
 
     setDisplayLoader(true);
     try {
-      const response = await OTPWidget.sendOTP({ identifier: `91${phone}` });
+      const response = await OTPWidget.sendOTP({
+        identifier: `91${normalizedPhone}`,
+      });
       if (response.type === "success") {
         setReqId(response.message);
         setOtpSent(true);
@@ -140,6 +206,13 @@ export default function LoginPage() {
   const verifyOTP = async (event) => {
     event?.preventDefault();
     const mobileOTP = otp.join("");
+    const normalizedPhone = phone.replace(/\D/g, "").slice(-10);
+
+    if (isDebugMode && normalizedPhone === DEBUG_LOGIN_MOBILE) {
+      completeLoginSession(newUser);
+      return;
+    }
+
     if (mobileOTP.length !== OTP_LENGTH) {
       toast.error("Please enter the complete 6-digit OTP.");
       return;
@@ -149,19 +222,7 @@ export default function LoginPage() {
     try {
       const response = await OTPWidget.verifyOTP({ otp: mobileOTP, reqId });
       if (response.type === "success") {
-        const loggedInUser = { ...newUser, loggedIn: true };
-        setCookie("user", encryptData(loggedInUser), 15 * 24 * 60);
-        setUSER(loggedInUser);
-        setState(loggedInUser);
-        setPhone("");
-        setName("");
-        setOtp(Array(OTP_LENGTH).fill(""));
-        setOtpSent(false);
-        setReqId("");
-        setCountdown(0);
-        setNeedsRegistration(false);
-        toast.success("You are successfully logged in!");
-        router.replace("/dashboard");
+        completeLoginSession(newUser);
       } else {
         toast.error("That OTP is not valid. Please try again.");
       }
@@ -205,7 +266,12 @@ export default function LoginPage() {
     setReqId("");
     setCountdown(0);
   };
-
+  useEffect(() => {
+    if (state?.loggedIn) {
+      router.replace("/dashboard");
+      return;
+    }
+  }, []);
   return (
     <main className={styles.loginPage}>
       {displayLoader && <Loader />}

@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { deleteAllCookies } from "../modules/encryption";
@@ -10,22 +10,23 @@ import {
 } from "../context/Store";
 import logo from "../images/tlmt.jpg";
 
-const navItems = [
-  { label: "Home", href: "/" },
-  { label: "Services", href: "/services" },
-  { label: "Gallery", href: "/gallery" },
-  { label: "Contact", href: "/contact" },
-];
-
 export default function Navbar() {
   const router = useRouter();
   const { state, USER, setState, setUSER, setStateArray, setStateObject } =
     useGlobalContext();
   const isLoggedIn = Boolean(state?.loggedIn && USER?.phone);
+  const isAdmin = state?.userType?.toLowerCase() === "admin";
   const displayName = USER?.name?.trim().split(" ")[0] || "Account";
+  const navItems = [
+    { label: "Home", href: "/" },
+    { label: "Services", href: "/services" },
+    { label: "Gallery", href: "/gallery" },
+    ...(isAdmin ? [{ label: "Manage Users", href: "/regUsers" }] : []),
+  ];
 
   const logout = () => {
     deleteAllCookies();
+    window.localStorage.removeItem("tlmt-auth-session");
     setState(initialSessionState);
     setUSER(emptyUser);
     setStateArray([]);
@@ -112,7 +113,7 @@ export default function Navbar() {
                 <li className="nav-item ms-lg-2">
                   <a
                     className="btn btn-outline-dark rounded-pill px-3"
-                    href="#contact"
+                    href="/contact"
                   >
                     <i className="bi bi-calendar-check me-2"></i>Appointment
                   </a>

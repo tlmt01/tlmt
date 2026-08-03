@@ -50,6 +50,7 @@ export const FirebaseProvider = (props) => {
     photoName = "",
     customerID = "",
     url = "",
+    address = "",
   }) => {
     const userRef = doc(firestore, "users", phone);
     await runTransaction(firestore, async (transaction) => {
@@ -69,6 +70,7 @@ export const FirebaseProvider = (props) => {
         photoName,
         customerID,
         url,
+        address: address.trim(),
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
