@@ -4,13 +4,19 @@ import { createUserWithEmailAndPassword, deleteUser } from "firebase/auth";
 import { createContext, useContext } from "react";
 import { set, ref } from "firebase/database";
 import {
-  doc,
+  collection,
   deleteDoc,
+  doc,
   getDoc,
-  runTransaction,
+  getDocs,
+  query,
   serverTimestamp,
+  setDoc,
+  updateDoc,
+  where,
 } from "firebase/firestore";
 import {
+  deleteObject,
   getDownloadURL,
   ref as storageRef,
   uploadBytes,
@@ -19,6 +25,17 @@ import {
 import { database, firebaseAuth, firestore, storage } from "@/lib/firebase";
 
 const FirebaseContext = createContext(null);
+const getStoragePathFromUrl = (photoUrl = "") => {
+  if (!photoUrl) return "";
+
+  try {
+    const encodedPath = photoUrl.split("/o/")[1]?.split("?")[0];
+    return encodedPath ? decodeURIComponent(encodedPath) : "";
+  } catch {
+    return "";
+  }
+};
+
 export const useFirebase = () => useContext(FirebaseContext);
 export const FirebaseProvider = (props) => {
   const signupUserWithEmailAndPass = (email, password) => {
@@ -34,8 +51,48 @@ export const FirebaseProvider = (props) => {
   };
 
   const getUserByPhone = async (phone) => {
-    const userSnapshot = await getDoc(doc(firestore, "users", phone));
-    return userSnapshot.exists() ? userSnapshot.data() : null;
+    const usersRef = collection(firestore, "users");
+    const phoneQuery = query(usersRef, where("phone", "==", phone));
+    const snapshot = await getDocs(phoneQuery);
+
+    if (!snapshot.empty) {
+      const matches = snapshot.docs.map((item) => ({
+        docId: item.id,
+        ...item.data(),
+        id: item.data().id || item.id,
+      }));
+      return (
+        matches.find((user) => user.id !== user.docId) || matches[0] || null
+      );
+    }
+
+    return null;
+  };
+
+  const getUserById = async (userId) => {
+    const userRef = doc(firestore, "users", userId);
+    const primaryDoc = await getDoc(userRef);
+    if (primaryDoc.exists()) {
+      return {
+        docId: primaryDoc.id,
+        ...primaryDoc.data(),
+        id: primaryDoc.data().id || primaryDoc.id,
+      };
+    }
+
+    const usersRef = collection(firestore, "users");
+    const idQuery = query(usersRef, where("id", "==", userId));
+    const snapshot = await getDocs(idQuery);
+    if (!snapshot.empty) {
+      const firstMatch = snapshot.docs[0];
+      return {
+        docId: firstMatch.id,
+        ...firstMatch.data(),
+        id: firstMatch.data().id || firstMatch.id,
+      };
+    }
+
+    return null;
   };
 
   const registerUserProfile = async ({
@@ -47,55 +104,144 @@ export const FirebaseProvider = (props) => {
     disabled = false,
     empid = "",
     id = "",
-    photoName = "",
+    photoPath = "",
     customerID = "",
     url = "",
     address = "",
   }) => {
-    const userRef = doc(firestore, "users", phone);
-    await runTransaction(firestore, async (transaction) => {
-      const existingUser = await transaction.get(userRef);
-      if (existingUser.exists()) {
-        throw new Error("A profile with this mobile number already exists.");
-      }
-      transaction.set(userRef, {
-        name: name.trim(),
-        phone,
-        email: email.trim().toLowerCase(),
-        userType,
-        desig,
-        disabled,
-        empid,
-        id,
-        photoName,
-        customerID,
-        url,
-        address: address.trim(),
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      });
+    const stableUserId = id || customerID || phone;
+    const userRef = doc(firestore, "users", stableUserId);
+    const existingUser = await getDoc(userRef);
+    if (existingUser.exists()) {
+      throw new Error("A profile with this user ID already exists.");
+    }
+
+    const phoneMatch = await getDocs(
+      query(collection(firestore, "users"), where("phone", "==", phone)),
+    );
+    if (!phoneMatch.empty) {
+      throw new Error("A profile with this mobile number already exists.");
+    }
+
+    await setDoc(userRef, {
+      name: name.trim(),
+      phone,
+      email: email.trim().toLowerCase(),
+      userType,
+      desig,
+      disabled,
+      empid,
+      id: stableUserId,
+      photoPath,
+      customerID,
+      url,
+      address: address.trim(),
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
     });
   };
 
-  const uploadUserPhoto = async ({ file, userId }) => {
+  const updateUserProfile = async ({
+    userId,
+    name,
+    phone,
+    email = "",
+    userType = "customer",
+    desig = "customer",
+    disabled = false,
+    empid = "",
+    photoPath = "",
+    customerID = "",
+    url = "",
+    address = "",
+  }) => {
+    const currentProfile = await getUserById(userId);
+    if (!currentProfile) {
+      throw new Error("Your profile could not be found. Please sign in again.");
+    }
+
+    const normalizedPhone = phone.replace(/\D/g, "").slice(-10);
+    const phoneMatches = await getDocs(
+      query(
+        collection(firestore, "users"),
+        where("phone", "==", normalizedPhone),
+      ),
+    );
+    const duplicate = phoneMatches.docs.find(
+      (item) => item.id !== currentProfile.docId,
+    );
+    if (duplicate) {
+      throw new Error("That mobile number already belongs to another user.");
+    }
+
+    const userRef = doc(firestore, "users", currentProfile.docId);
+    await updateDoc(userRef, {
+      name: name.trim(),
+      phone: normalizedPhone,
+      email: email.trim().toLowerCase(),
+      userType,
+      desig,
+      disabled,
+      empid,
+      id: currentProfile.id || userId,
+      photoPath,
+      customerID,
+      url,
+      address: address.trim(),
+      updatedAt: serverTimestamp(),
+    });
+
+    return {
+      ...currentProfile,
+      name: name.trim(),
+      phone: normalizedPhone,
+      email: email.trim().toLowerCase(),
+      userType,
+      desig,
+      disabled,
+      empid,
+      id: currentProfile.id || userId,
+      photoPath,
+      customerID,
+      url,
+      address: address.trim(),
+    };
+  };
+
+  const uploadUserPhoto = async ({
+    file,
+    userId,
+    oldPhotoPath = "",
+    oldPhotoUrl = "",
+  }) => {
     if (!file) {
-      return { url: "", photoName: "" };
+      return { url: "", photoPath: "" };
     }
 
     try {
       const safeFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-      const photoRef = storageRef(
-        storage,
-        `users/${userId}/${Date.now()}-${safeFileName}`,
-      );
+      const photoPath = `users/${userId}/${Date.now()}-${safeFileName}`;
+      const photoRef = storageRef(storage, photoPath);
       await uploadBytes(photoRef, file, { contentType: file.type });
+
+      const resolvedOldPhotoPath =
+        oldPhotoPath || getStoragePathFromUrl(oldPhotoUrl);
+
+      if (resolvedOldPhotoPath) {
+        try {
+          await deleteObject(storageRef(storage, resolvedOldPhotoPath));
+        } catch {
+          console.warn("Unable to remove the previous profile photo.");
+        }
+      }
+
       return {
         url: await getDownloadURL(photoRef),
-        photoName: file.name,
+        photoPath,
       };
     } catch (error) {
       console.error("Unable to upload profile photo:", error);
-      return { url: "", photoName: "" };
+      return { url: "", photoPath: "" };
     }
   };
 
@@ -121,7 +267,9 @@ export const FirebaseProvider = (props) => {
         putData,
         deleteData,
         getUserByPhone,
+        getUserById,
         registerUserProfile,
+        updateUserProfile,
         uploadUserPhoto,
         verifyEmailOTP,
       }}

@@ -86,6 +86,15 @@ export default function Navbar() {
                     Dashboard
                   </a>
                 </li>
+                <li className="nav-item">
+                  <a
+                    className="nav-link px-3 py-2 rounded-pill"
+                    href="/profile"
+                  >
+                    <i className="bi bi-person-gear me-2" />
+                    Edit Profile
+                  </a>
+                </li>
                 <li className="nav-item ms-lg-2">
                   <span className="nav-link px-3 py-2">
                     <i className="bi bi-person-circle me-2" />

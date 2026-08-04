@@ -5,15 +5,16 @@ import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import {
   collection,
-  deleteDoc,
   doc,
   getDocs,
+  query,
   serverTimestamp,
-  setDoc,
   updateDoc,
+  where,
 } from "firebase/firestore";
 import { firestore } from "@/lib/firebase";
 import { useGlobalContext } from "@/context/Store";
+import Image from "next/image";
 
 const emptyForm = {
   name: "",
@@ -24,7 +25,7 @@ const emptyForm = {
   disabled: false,
   empid: "",
   id: "",
-  photoName: "",
+  photoPath: "",
   customerID: "",
   url: "",
   address: "",
@@ -59,8 +60,9 @@ export default function RegUsersPage() {
       try {
         const snapshot = await getDocs(collection(firestore, "users"));
         const rows = snapshot.docs.map((item) => ({
-          id: item.id,
+          docId: item.id,
           ...item.data(),
+          id: item.data().id || item.id,
         }));
 
         setUsers(rows);
@@ -134,28 +136,43 @@ export default function RegUsersPage() {
     setSaving(true);
     try {
       const oldPhone = selectedUser.phone;
-      const oldRef = doc(firestore, "users", oldPhone);
-      const newRef = doc(firestore, "users", normalizedPhone);
+      const oldRef = doc(
+        firestore,
+        "users",
+        selectedUser.docId || selectedUser.id,
+      );
 
       if (oldPhone !== normalizedPhone) {
-        const existingDoc = await newRef.get?.();
-        if (existingDoc?.exists?.()) {
+        const phoneMatches = await getDocs(
+          query(
+            collection(firestore, "users"),
+            where("phone", "==", normalizedPhone),
+          ),
+        );
+        const duplicatePhone = phoneMatches.docs.find(
+          (item) => item.id !== selectedUser.docId,
+        );
+        if (duplicatePhone) {
           toast.error("That phone number already belongs to another user.");
           return;
         }
-
-        await setDoc(newRef, payload);
-        await deleteDoc(oldRef);
-      } else {
-        await updateDoc(oldRef, payload);
       }
 
+      await updateDoc(oldRef, payload);
+
       const updatedRows = users.map((user) =>
-        user.phone === oldPhone ? { ...payload, id: normalizedPhone } : user,
+        user.docId === selectedUser.docId
+          ? { ...payload, docId: selectedUser.docId, id: selectedUser.id }
+          : user,
       );
       setUsers(updatedRows);
       setSelectedPhone(normalizedPhone);
-      setFormData({ ...emptyForm, ...payload });
+      setFormData({
+        ...emptyForm,
+        ...payload,
+        docId: selectedUser.docId,
+        id: selectedUser.id,
+      });
       toast.success("User details updated successfully.");
     } catch {
       toast.error("Could not update this user profile.");
@@ -245,6 +262,27 @@ export default function RegUsersPage() {
 
           <div className="col-lg-8">
             <form className="admin-form-card" onSubmit={handleSave}>
+              <div className="d-flex flex-column align-items-center">
+                {formData.url && (
+                  <>
+                    <div className="mb-2">
+                      <Image
+                        src={formData.url}
+                        alt="Profile Photo"
+                        width={100}
+                        height={100}
+                        style={{ objectFit: "cover", borderRadius: "50%" }}
+                      />
+                    </div>
+                    <label
+                      htmlFor="profilePhoto"
+                      className="form-label d-block text-center mt-1 text-muted"
+                    >
+                      Photo Path: {formData.photoPath || "N/A"}
+                    </label>
+                  </>
+                )}
+              </div>
               <div className="row g-3">
                 <div className="col-md-6">
                   <label className="form-label">Full name</label>
@@ -321,20 +359,10 @@ export default function RegUsersPage() {
                 </div>
 
                 <div className="col-md-6">
-                  <label className="form-label">Profile URL</label>
+                  <label className="form-label">Photo Path</label>
                   <input
-                    name="url"
-                    value={formData.url}
-                    onChange={handleChange}
-                    className="form-control"
-                  />
-                </div>
-
-                <div className="col-md-6">
-                  <label className="form-label">Photo Name</label>
-                  <input
-                    name="photoName"
-                    value={formData.photoName}
+                    name="photoPath"
+                    value={formData.photoPath}
                     onChange={handleChange}
                     className="form-control"
                   />

@@ -68,9 +68,14 @@ export default function DashboardPage() {
             Everything you love about your style journey, gathered in one
             beautiful place.
           </p>
-          <Link href="/contact" className={styles.primaryAction}>
-            Book an appointment <i className="bi bi-arrow-right" />
-          </Link>
+          <div className={styles.quickActions}>
+            <Link href="/contact" className={styles.primaryAction}>
+              Book an appointment <i className="bi bi-arrow-right" />
+            </Link>
+            <Link href="/profile" className={styles.primaryAction}>
+              Edit profile <i className="bi bi-pencil-square" />
+            </Link>
+          </div>
         </div>
         <div className={styles.heroMark} aria-hidden="true">
           <span>TLMT</span>
@@ -99,8 +104,7 @@ export default function DashboardPage() {
             <strong>{name}</strong>
           </div>
           <span className={styles.memberBadge}>
-            <i className="bi bi-heart-fill" /> {USER?.userType || "Style"}{" "}
-            member
+            <i className="bi bi-heart-fill" /> {USER?.userType || "Style"}
           </span>
         </div>
         <div className={styles.sectionHeading}>

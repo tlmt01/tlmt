@@ -276,7 +276,7 @@ function RegisterPageContent() {
     setDisplayLoader(true);
     try {
       let uploadedUrl = url;
-      let uploadedPhotoName = photoName;
+      let uploadedPhotoPath = "";
       if (selectedPhoto) {
         setPhotoUploading(true);
         const uploadedPhoto = await uploadUserPhoto({
@@ -284,7 +284,7 @@ function RegisterPageContent() {
           userId: id,
         });
         uploadedUrl = uploadedPhoto.url || "";
-        uploadedPhotoName = uploadedPhoto.photoName || "";
+        uploadedPhotoPath = uploadedPhoto.photoPath || "";
         setUrl(uploadedUrl);
         if (!uploadedUrl) {
           toast.warning(
@@ -301,7 +301,7 @@ function RegisterPageContent() {
         desig,
         disabled,
         empid,
-        photoName: uploadedPhotoName,
+        photoPath: uploadedPhotoPath,
         customerID,
         url: uploadedUrl,
         address,
