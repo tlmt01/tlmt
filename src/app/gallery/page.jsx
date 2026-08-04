@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useFirebase } from "@/context/FirebaseContext";
 import { useGlobalContext } from "@/context/Store";
-
-const STORAGE_KEY = "tlmt-gallery-designs";
 
 const defaultGallery = [
   {
@@ -38,50 +37,145 @@ const defaultGallery = [
 
 export default function GalleryPage() {
   const { state } = useGlobalContext();
+  const {
+    addGalleryItem,
+    deleteGalleryItem,
+    getGalleryItems,
+    updateGalleryItem,
+    uploadGalleryImage,
+  } = useFirebase();
   const fileInputRef = useRef(null);
   const [galleryItems, setGalleryItems] = useState(defaultGallery);
   const [uploadingMessage, setUploadingMessage] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [editingItem, setEditingItem] = useState(null);
 
   useEffect(() => {
-    try {
-      const savedGallery = window.localStorage.getItem(STORAGE_KEY);
-      if (savedGallery) {
-        const parsedGallery = JSON.parse(savedGallery);
-        if (Array.isArray(parsedGallery) && parsedGallery.length > 0) {
-          setGalleryItems(parsedGallery);
-        }
+    const loadGalleryItems = async () => {
+      try {
+        const items = await getGalleryItems();
+        setGalleryItems(items.length ? items : defaultGallery);
+      } catch {
+        setGalleryItems(defaultGallery);
       }
-    } catch {
-      setGalleryItems(defaultGallery);
-    }
-  }, []);
+    };
 
-  useEffect(() => {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(galleryItems));
-  }, [galleryItems]);
+    loadGalleryItems();
+  }, [getGalleryItems]);
 
   const isAdmin = state?.userType?.toLowerCase() === "admin";
 
-  const handleImageUpload = (event) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  const resetForm = () => {
+    setTitle("");
+    setDescription("");
+    setSelectedFile(null);
+    setEditingItem(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      const newDesign = {
-        id: Date.now(),
-        title: file.name.replace(/\.[^/.]+$/, "") || "New Design",
-        description:
-          "Admin uploaded design ready to be featured in the gallery.",
-        src: reader.result,
-      };
+  const handleSubmit = async (event) => {
+    event.preventDefault();
 
-      setGalleryItems((prev) => [newDesign, ...prev]);
-      setUploadingMessage("Design uploaded successfully.");
-      event.target.value = "";
-    };
+    if (!isAdmin) return;
+    if (!title.trim() || !description.trim()) {
+      setUploadingMessage("Please enter both the title and description.");
+      return;
+    }
 
-    reader.readAsDataURL(file);
+    if (!editingItem && !selectedFile) {
+      setUploadingMessage("Please choose an image before saving.");
+      return;
+    }
+
+    setIsSaving(true);
+    setUploadingMessage("");
+
+    try {
+      let nextImageUrl = editingItem?.src || "";
+      let nextPhotoPath = editingItem?.photoPath || "";
+
+      if (selectedFile) {
+        const uploadResult = await uploadGalleryImage({
+          file: selectedFile,
+          existingPhotoPath: editingItem?.photoPath || "",
+        });
+        nextImageUrl = uploadResult.url || nextImageUrl;
+        nextPhotoPath = uploadResult.photoPath || nextPhotoPath;
+      }
+
+      if (editingItem) {
+        const updatedItem = await updateGalleryItem({
+          docId: editingItem.docId,
+          title,
+          description,
+          src: nextImageUrl,
+          photoPath: nextPhotoPath,
+        });
+
+        setGalleryItems((prev) =>
+          prev.map((item) =>
+            item.docId === editingItem.docId
+              ? { ...item, ...updatedItem }
+              : item,
+          ),
+        );
+        setUploadingMessage("Design updated successfully.");
+      } else {
+        const createdItem = await addGalleryItem({
+          title,
+          description,
+          src: nextImageUrl,
+          photoPath: nextPhotoPath,
+        });
+
+        setGalleryItems((prev) => [createdItem, ...prev]);
+        setUploadingMessage("Design saved successfully.");
+      }
+
+      resetForm();
+    } catch (error) {
+      setUploadingMessage(
+        error?.message || "Something went wrong while saving the design.",
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleEdit = (item) => {
+    setEditingItem(item);
+    setTitle(item.title || "");
+    setDescription(item.description || "");
+    setSelectedFile(null);
+    setUploadingMessage("");
+  };
+
+  const handleDelete = async (item) => {
+    if (!isAdmin) return;
+    if (!window.confirm("Delete this gallery item?")) return;
+
+    try {
+      await deleteGalleryItem({
+        docId: item.docId,
+        photoPath: item.photoPath || "",
+      });
+      setGalleryItems((prev) =>
+        prev.filter((galleryItem) => galleryItem.docId !== item.docId),
+      );
+      if (editingItem?.docId === item.docId) {
+        resetForm();
+      }
+      setUploadingMessage("Design deleted successfully.");
+    } catch (error) {
+      setUploadingMessage(
+        error?.message || "Unable to delete the selected design.",
+      );
+    }
   };
 
   return (
@@ -96,47 +190,93 @@ export default function GalleryPage() {
               </h1>
               <p className="services-copy">
                 Browse the boutique’s latest stitched stories and featured work.
-                If you are signed in as an admin, you can instantly upload your
-                own design images here.
+                Admins can save new design titles and descriptions to the shared
+                gallery database and manage them from here.
               </p>
             </div>
 
             <div className="col-lg-6">
               {isAdmin && (
                 <div className="upload-panel">
-                  <>
-                    <div className="d-flex justify-content-between align-items-center mb-3">
-                      <div>
-                        <h4 className="fw-bold mb-1">Admin Upload Panel</h4>
-                        <p className="text-muted small mb-0">
-                          Showcase your new boutique designs in one place.
-                        </p>
-                      </div>
-                      <span className="services-pill">
-                        {isAdmin ? "Admin Access" : "View Only"}
-                      </span>
+                  <div className="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                      <h4 className="fw-bold mb-1">Admin Gallery Panel</h4>
+                      <p className="text-muted small mb-0">
+                        Add a design title, description, and image in one place.
+                      </p>
                     </div>
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*"
-                      className="form-control"
-                      onChange={handleImageUpload}
-                    />
-                    <div className="mt-3 d-flex align-items-center gap-2">
+                    <span className="services-pill">Admin Access</span>
+                  </div>
+
+                  <form onSubmit={handleSubmit}>
+                    <div className="mb-3">
+                      <label className="form-label fw-semibold">
+                        Image Title
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={title}
+                        onChange={(event) => setTitle(event.target.value)}
+                        placeholder="Enter design title"
+                      />
+                    </div>
+
+                    <div className="mb-3">
+                      <label className="form-label fw-semibold">
+                        Description
+                      </label>
+                      <textarea
+                        className="form-control"
+                        rows="3"
+                        value={description}
+                        onChange={(event) => setDescription(event.target.value)}
+                        placeholder="Enter a short design description"
+                      />
+                    </div>
+
+                    <div className="mb-3">
+                      <label className="form-label fw-semibold">
+                        Image File
+                      </label>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        className="form-control"
+                        onChange={(event) =>
+                          setSelectedFile(event.target.files?.[0] || null)
+                        }
+                      />
+                    </div>
+
+                    <div className="d-flex flex-wrap gap-2">
                       <button
+                        type="submit"
                         className="btn btn-danger rounded-pill px-4"
-                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isSaving}
                       >
-                        Upload Design
+                        {isSaving
+                          ? "Saving..."
+                          : editingItem
+                            ? "Update Design"
+                            : "Save Design"}
                       </button>
-                      {uploadingMessage ? (
-                        <span className="small text-success fw-semibold">
-                          {uploadingMessage}
-                        </span>
-                      ) : null}
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary rounded-pill px-4"
+                        onClick={resetForm}
+                      >
+                        Clear
+                      </button>
                     </div>
-                  </>
+
+                    {uploadingMessage ? (
+                      <div className="mt-3 small text-success fw-semibold">
+                        {uploadingMessage}
+                      </div>
+                    ) : null}
+                  </form>
                 </div>
               )}
             </div>
@@ -152,7 +292,10 @@ export default function GalleryPage() {
 
         <div className="row g-4">
           {galleryItems.map((item) => (
-            <div className="col-lg-3 col-md-4 col-sm-6" key={item.id}>
+            <div
+              className="col-lg-3 col-md-4 col-sm-6"
+              key={item.docId || item.id}
+            >
               <article className="gallery-card h-100">
                 <img
                   src={item.src}
@@ -162,6 +305,25 @@ export default function GalleryPage() {
                 <div className="p-4">
                   <h5 className="fw-bold mb-2">{item.title}</h5>
                   <p className="text-muted mb-0">{item.description}</p>
+
+                  {isAdmin && (
+                    <div className="d-flex gap-2 mt-3">
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary btn-sm rounded-pill"
+                        onClick={() => handleEdit(item)}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-outline-danger btn-sm rounded-pill"
+                        onClick={() => handleDelete(item)}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  )}
                 </div>
               </article>
             </div>

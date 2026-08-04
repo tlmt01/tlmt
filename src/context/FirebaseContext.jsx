@@ -245,6 +245,121 @@ export const FirebaseProvider = (props) => {
     }
   };
 
+  const uploadGalleryImage = async ({
+    file,
+    folder = "gallery",
+    existingPhotoPath = "",
+  }) => {
+    if (!file) {
+      return { url: "", photoPath: "" };
+    }
+
+    const safeFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+    const photoPath = `${folder}/${Date.now()}-${safeFileName}`;
+    const photoRef = storageRef(storage, photoPath);
+    await uploadBytes(photoRef, file, { contentType: file.type });
+
+    if (existingPhotoPath) {
+      try {
+        await deleteObject(storageRef(storage, existingPhotoPath));
+      } catch {
+        console.warn("Unable to remove the previous gallery image.");
+      }
+    }
+
+    return {
+      url: await getDownloadURL(photoRef),
+      photoPath,
+    };
+  };
+
+  const getGalleryItems = async () => {
+    const galleryRef = collection(firestore, "gallery");
+    const snapshot = await getDocs(galleryRef);
+
+    return snapshot.docs
+      .map((item) => ({
+        docId: item.id,
+        ...item.data(),
+        id: item.data().id || item.id,
+      }))
+      .sort((left, right) => {
+        const leftTime = Number(
+          left.updatedAt?.seconds || left.createdAt?.seconds || 0,
+        );
+        const rightTime = Number(
+          right.updatedAt?.seconds || right.createdAt?.seconds || 0,
+        );
+        return rightTime - leftTime;
+      });
+  };
+
+  const addGalleryItem = async ({
+    title,
+    description,
+    src,
+    photoPath = "",
+  }) => {
+    const galleryId = `gallery-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+    const galleryRef = doc(firestore, "gallery", galleryId);
+
+    await setDoc(galleryRef, {
+      id: galleryId,
+      title: title.trim(),
+      description: description.trim(),
+      src,
+      photoPath,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+
+    return {
+      docId: galleryId,
+      id: galleryId,
+      title: title.trim(),
+      description: description.trim(),
+      src,
+      photoPath,
+    };
+  };
+
+  const updateGalleryItem = async ({
+    docId,
+    title,
+    description,
+    src,
+    photoPath = "",
+  }) => {
+    const galleryRef = doc(firestore, "gallery", docId);
+    await updateDoc(galleryRef, {
+      title: title.trim(),
+      description: description.trim(),
+      src,
+      photoPath,
+      updatedAt: serverTimestamp(),
+    });
+
+    return {
+      docId,
+      title: title.trim(),
+      description: description.trim(),
+      src,
+      photoPath,
+    };
+  };
+
+  const deleteGalleryItem = async ({ docId, photoPath = "" }) => {
+    if (photoPath) {
+      try {
+        await deleteObject(storageRef(storage, photoPath));
+      } catch {
+        console.warn("Unable to remove the saved gallery image from storage.");
+      }
+    }
+
+    await deleteDoc(doc(firestore, "gallery", docId));
+  };
+
   const verifyEmailOTP = async ({ email, otp }) => {
     const otpRef = doc(firestore, "otps", otp);
     const otpSnapshot = await getDoc(otpRef);
@@ -271,6 +386,11 @@ export const FirebaseProvider = (props) => {
         registerUserProfile,
         updateUserProfile,
         uploadUserPhoto,
+        uploadGalleryImage,
+        getGalleryItems,
+        addGalleryItem,
+        updateGalleryItem,
+        deleteGalleryItem,
         verifyEmailOTP,
       }}
     >
