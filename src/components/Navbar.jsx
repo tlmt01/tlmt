@@ -21,7 +21,14 @@ export default function Navbar() {
     { label: "Home", href: "/" },
     { label: "Services", href: "/services" },
     { label: "Gallery", href: "/gallery" },
-    ...(isAdmin ? [{ label: "Manage Users", href: "/regUsers" }] : []),
+    ...(isAdmin
+      ? [
+          // { label: "Add Customer", href: "/addCustomer" },
+          { label: "New Order", href: "/newOrder" },
+          { label: "Manage Orders", href: "/jobOrders" },
+          { label: "Manage Users", href: "/regUsers" },
+        ]
+      : []),
   ];
 
   const logout = () => {
