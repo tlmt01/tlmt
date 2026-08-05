@@ -16,7 +16,10 @@ export default function Navbar() {
     useGlobalContext();
   const isLoggedIn = Boolean(state?.loggedIn && USER?.phone);
   const isAdmin = state?.userType?.toLowerCase() === "admin";
-  const displayName = USER?.name?.trim().split(" ")[0] || "Account";
+  const displayName =
+    USER?.name?.trim() ||
+    // .split(" ")[0]
+    "Account";
   const navItems = [
     { label: "Home", href: "/" },
     { label: "Services", href: "/services" },
