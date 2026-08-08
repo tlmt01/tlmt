@@ -8,14 +8,17 @@ import {
   doc,
   getDoc,
   setDoc,
+  updateDoc,
 } from "firebase/firestore";
+import { getDownloadURL, ref, uploadString } from "firebase/storage";
 
-import { firestore } from "@/lib/firebase";
+import { firestore, storage } from "@/lib/firebase";
 
 import CustomerSearch, { Customer } from "./components/CustomerSearch";
 
 import MeasurementForm from "./components/MeasurementForm";
 import DesignSection from "./components/DesignSection";
+import DesignSketch from "./components/DesignSketch";
 
 export default function NewJobOrder() {
   const [loading, setLoading] = useState(false);
@@ -38,6 +41,7 @@ export default function NewJobOrder() {
   const [measurements, setMeasurements] = useState<Record<string, string>>({});
 
   const [design, setDesign] = useState<Record<string, string>>({});
+  const [designSketchUrl, setDesignSketchUrl] = useState("");
 
   const [pieceType, setPieceType] = useState("Kurti");
 
@@ -59,6 +63,7 @@ export default function NewJobOrder() {
 
     setMeasurements({});
     setDesign({});
+    setDesignSketchUrl("");
   };
 
   const generateOrderNo = () => {
@@ -117,7 +122,7 @@ export default function NewJobOrder() {
 
       const orderNo = orderInfo.orderNo || generateOrderNo();
 
-      await addDoc(collection(firestore, "jobOrders"), {
+      const docRef = await addDoc(collection(firestore, "jobOrders"), {
         customer,
         pieceType,
         measurements,
@@ -142,6 +147,18 @@ export default function NewJobOrder() {
 
         createdAt: serverTimestamp(),
       });
+
+      if (designSketchUrl) {
+        const imageRef = ref(
+          storage,
+          `jobOrders/${docRef.id}/design-sketch.png`,
+        );
+        await uploadString(imageRef, designSketchUrl, "data_url");
+        const savedUrl = await getDownloadURL(imageRef);
+        await updateDoc(doc(firestore, "jobOrders", docRef.id), {
+          designSketchUrl: savedUrl,
+        });
+      }
 
       await saveCustomer();
 
@@ -339,6 +356,18 @@ export default function NewJobOrder() {
             design={design}
             setDesign={setDesign}
           />
+
+          <div className="card border-0 shadow-sm mb-4">
+            <div className="card-header bg-info text-white fw-bold">
+              Design Sketch
+            </div>
+            <div className="card-body">
+              <DesignSketch
+                drawingDataUrl={designSketchUrl}
+                onChange={setDesignSketchUrl}
+              />
+            </div>
+          </div>
 
           {/* ================= Payment Summary ================= */}
 

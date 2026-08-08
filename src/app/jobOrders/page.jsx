@@ -12,8 +12,10 @@ import {
   serverTimestamp,
   updateDoc,
 } from "firebase/firestore";
-import { firestore } from "@/lib/firebase";
+import { getDownloadURL, ref, uploadString } from "firebase/storage";
+import { firestore, storage } from "@/lib/firebase";
 import { useGlobalContext } from "@/context/Store";
+import DesignSketch from "@/app/newOrder/components/DesignSketch";
 
 const statusOptions = [
   "Pending",
@@ -49,6 +51,8 @@ export default function JobOrdersPage() {
   const [selectedId, setSelectedId] = useState("");
   const [draftOrder, setDraftOrder] = useState(emptyDraft);
   const [draftMeasurements, setDraftMeasurements] = useState({});
+  const [isEditingSketch, setIsEditingSketch] = useState(false);
+  const [editingSketchUrl, setEditingSketchUrl] = useState("");
 
   useEffect(() => {
     if (!authReady) return;
@@ -118,6 +122,8 @@ export default function JobOrdersPage() {
     if (!selectedOrder) {
       setDraftOrder(emptyDraft);
       setDraftMeasurements({});
+      setIsEditingSketch(false);
+      setEditingSketchUrl("");
       return;
     }
 
@@ -133,7 +139,8 @@ export default function JobOrdersPage() {
     });
 
     setDraftMeasurements(
-      selectedOrder.measurements && typeof selectedOrder.measurements === "object"
+      selectedOrder.measurements &&
+        typeof selectedOrder.measurements === "object"
         ? Object.fromEntries(
             Object.entries(selectedOrder.measurements).map(([key, value]) => [
               key,
@@ -142,6 +149,8 @@ export default function JobOrdersPage() {
           )
         : {},
     );
+    setIsEditingSketch(false);
+    setEditingSketchUrl(selectedOrder.designSketchUrl || "");
   }, [selectedOrder]);
 
   const summary = useMemo(() => {
@@ -195,9 +204,29 @@ export default function JobOrdersPage() {
       const orderRef = doc(firestore, "jobOrders", selectedOrder.docId);
       await updateDoc(orderRef, payload);
 
+      let designSketchUrl = selectedOrder.designSketchUrl || "";
+      if (
+        isEditingSketch &&
+        editingSketchUrl !== selectedOrder.designSketchUrl
+      ) {
+        if (!editingSketchUrl) {
+          await updateDoc(orderRef, { designSketchUrl: "" });
+          designSketchUrl = "";
+        } else {
+          const imageRef = ref(
+            storage,
+            `jobOrders/${selectedOrder.docId}/design-sketch.png`,
+          );
+          await uploadString(imageRef, editingSketchUrl, "data_url");
+          designSketchUrl = await getDownloadURL(imageRef);
+          await updateDoc(orderRef, { designSketchUrl });
+        }
+      }
+
       const updatedOrder = {
         ...selectedOrder,
         ...payload,
+        designSketchUrl,
       };
 
       setOrders((current) =>
@@ -366,6 +395,9 @@ export default function JobOrdersPage() {
                       <div className="text-end">
                         <div className="badge bg-secondary rounded-pill px-3 py-2 mb-2 d-inline-block">
                           {selectedOrder.orderNo || "No order no"}
+                        </div>
+                        <div className="badge bg-info text-white rounded-pill px-3 py-2 mb-2 d-inline-block">
+                          {selectedOrder.pieceType || "Piece type not set"}
                         </div>
                         <div className="badge bg-light text-dark rounded-pill px-3 py-2 d-inline-block">
                           Balance {formatRupee(selectedOrder.balance)}
@@ -573,6 +605,60 @@ export default function JobOrdersPage() {
                                 </p>
                               )}
                             </div>
+                          </div>
+
+                          <div className="mt-4">
+                            <button
+                              type="button"
+                              className="btn btn-outline-primary me-2 mb-3"
+                              onClick={() => {
+                                setIsEditingSketch(true);
+                                setEditingSketchUrl(
+                                  selectedOrder.designSketchUrl || "",
+                                );
+                              }}
+                            >
+                              Change design sketch
+                            </button>
+                            {selectedOrder.designSketchUrl ? (
+                              <div className="card border-0 shadow-sm mt-2">
+                                <div className="card-header bg-white">
+                                  <strong className="mb-0">
+                                    Design sketch
+                                  </strong>
+                                </div>
+                                <div className="card-body p-3 text-center">
+                                  <img
+                                    src={selectedOrder.designSketchUrl}
+                                    alt="Saved design sketch"
+                                    className="img-fluid rounded"
+                                  />
+                                </div>
+                              </div>
+                            ) : null}
+
+                            {isEditingSketch ? (
+                              <div className="card border-0 shadow-sm mt-4">
+                                <div className="card-header bg-white">
+                                  <strong className="mb-0">
+                                    Edit design sketch
+                                  </strong>
+                                </div>
+                                <div className="card-body p-3">
+                                  <DesignSketch
+                                    drawingDataUrl={editingSketchUrl}
+                                    onChange={setEditingSketchUrl}
+                                  />
+                                  <button
+                                    type="button"
+                                    className="btn btn-outline-secondary mt-3"
+                                    onClick={() => setIsEditingSketch(false)}
+                                  >
+                                    Cancel sketch edit
+                                  </button>
+                                </div>
+                              </div>
+                            ) : null}
                           </div>
                         </div>
                       </div>
