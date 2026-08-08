@@ -1,6 +1,7 @@
 "use client";
 
 interface Props {
+  pieceType: string;
   measurements: Record<string, string>;
   setMeasurements: React.Dispatch<React.SetStateAction<Record<string, string>>>;
 }
@@ -49,9 +50,13 @@ const bodyFields = [
 ];
 
 export default function MeasurementForm({
+  pieceType,
   measurements,
   setMeasurements,
 }: Props) {
+  const measurementTitle =
+    pieceType === "Blouse" ? "Blouse Measurements" : "Kurti Measurements";
+
   const renderFields = (title: string, fields: string[]) => (
     <div className="card shadow-sm border-0 mb-4">
       <div className="card-header bg-success text-white fw-bold">{title}</div>
@@ -83,7 +88,7 @@ export default function MeasurementForm({
 
   return (
     <>
-      {renderFields("Kurti / Blouse Measurements", kurtiFields)}
+      {renderFields(measurementTitle, kurtiFields)}
 
       {renderFields("Sleeve Measurements", sleeveFields)}
 

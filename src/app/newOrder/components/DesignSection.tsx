@@ -1,6 +1,7 @@
 "use client";
 
 interface Props {
+  pieceType: string;
   design: Record<string, string>;
   setDesign: React.Dispatch<React.SetStateAction<Record<string, string>>>;
 }
@@ -66,10 +67,14 @@ function RadioGroup({
   );
 }
 
-export default function DesignSection({ design, setDesign }: Props) {
+export default function DesignSection({ pieceType, design, setDesign }: Props) {
   return (
     <div className="card shadow-sm border-0 mb-4">
-      <div className="card-header bg-warning fw-bold">Design Details</div>
+      <div className="card-header bg-warning fw-bold">
+        {pieceType === "Blouse"
+          ? "Blouse Design Details"
+          : "Kurti Design Details"}
+      </div>
 
       <div className="card-body">
         <div className="row">
