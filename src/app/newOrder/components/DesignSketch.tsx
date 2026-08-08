@@ -7,18 +7,23 @@ interface Props {
   onChange: (url: string) => void;
 }
 
-const CANVAS_WIDTH = 700;
-const CANVAS_HEIGHT = 360;
+const CANVAS_WIDTH = 1200;
+const CANVAS_HEIGHT = 720;
+const MIN_ZOOM = 0.75;
+const MAX_ZOOM = 2;
+const ZOOM_STEP = 0.25;
 
 export default function DesignSketch({ drawingDataUrl, onChange }: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const historyIndexRef = useRef(-1);
   const [isDrawing, setIsDrawing] = useState(false);
   const [history, setHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [tool, setTool] = useState<"pen" | "eraser">("pen");
-  const [penWidth, setPenWidth] = useState(3);
+  const [penWidth, setPenWidth] = useState(4);
   const [penColor, setPenColor] = useState("#000000");
+  const [zoom, setZoom] = useState(1);
 
   const getCanvas = () => canvasRef.current;
 
@@ -172,15 +177,39 @@ export default function DesignSketch({ drawingDataUrl, onChange }: Props) {
     onChange(history[nextIndex]);
   };
 
-  const saveSketch = () => {
-    const canvas = getCanvas();
-    if (!canvas) return;
-    const url = canvas.toDataURL("image/png");
-    const currentIndex = historyIndexRef.current;
-    const nextHistory = history.slice(0, currentIndex + 1).concat(url);
-    updateHistoryState(nextHistory, nextHistory.length - 1);
-    onChange(url);
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
   };
+
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const imageUrl = reader.result as string;
+      const canvas = getCanvas();
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+
+      const image = new Image();
+      image.onload = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+        saveHistory();
+      };
+      image.src = imageUrl;
+    };
+    reader.readAsDataURL(file);
+    event.target.value = "";
+  };
+
+  const zoomIn = () =>
+    setZoom((current) => Math.min(MAX_ZOOM, current + ZOOM_STEP));
+  const zoomOut = () =>
+    setZoom((current) => Math.max(MIN_ZOOM, current - ZOOM_STEP));
+  const resetZoom = () => setZoom(1);
 
   return (
     <div>
@@ -203,10 +232,17 @@ export default function DesignSketch({ drawingDataUrl, onChange }: Props) {
         </button>
         <button
           type="button"
-          className={`btn ${tool === "eraser" ? "btn-primary" : "btn-outline-primary"}`}
-          onClick={() => setTool(tool === "eraser" ? "pen" : "eraser")}
+          className={`btn ${tool === "pen" ? "btn-primary" : "btn-outline-primary"}`}
+          onClick={() => setTool("pen")}
         >
-          {tool === "eraser" ? "Using eraser" : "Eraser"}
+          Pen
+        </button>
+        <button
+          type="button"
+          className={`btn ${tool === "eraser" ? "btn-primary" : "btn-outline-primary"}`}
+          onClick={() => setTool("eraser")}
+        >
+          Eraser
         </button>
         <label className="d-flex align-items-center gap-2 mb-0">
           Width
@@ -230,6 +266,13 @@ export default function DesignSketch({ drawingDataUrl, onChange }: Props) {
         </label>
         <button
           type="button"
+          className="btn btn-outline-secondary"
+          onClick={handleUploadClick}
+        >
+          Upload photo
+        </button>
+        <button
+          type="button"
           className="btn btn-outline-danger"
           onClick={clearCanvas}
         >
@@ -237,12 +280,67 @@ export default function DesignSketch({ drawingDataUrl, onChange }: Props) {
         </button>
       </div>
 
-      <div className="mb-3">
+      <div className="d-flex flex-wrap gap-2 align-items-center mb-3">
+        <button
+          type="button"
+          className="btn btn-outline-secondary"
+          onClick={zoomOut}
+          disabled={zoom <= MIN_ZOOM}
+        >
+          Zoom -
+        </button>
+        <button
+          type="button"
+          className="btn btn-outline-secondary"
+          onClick={resetZoom}
+          disabled={zoom === 1}
+        >
+          Reset
+        </button>
+        <button
+          type="button"
+          className="btn btn-outline-secondary"
+          onClick={zoomIn}
+          disabled={zoom >= MAX_ZOOM}
+        >
+          Zoom +
+        </button>
+        <span className="ms-2">{Math.round(zoom * 100)}%</span>
+      </div>
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        style={{ display: "none" }}
+        onChange={handleImageUpload}
+      />
+
+      <div
+        className="mb-3"
+        style={{
+          overflow: "auto",
+          minHeight: 420,
+          maxHeight: 720,
+          border: "1px solid #dee2e6",
+          borderRadius: 8,
+          padding: 8,
+          background: "#fff",
+        }}
+      >
         <canvas
           ref={canvasRef}
           width={CANVAS_WIDTH}
           height={CANVAS_HEIGHT}
-          className="w-100 border rounded"
+          style={{
+            display: "block",
+            width: "100%",
+            height: "auto",
+            minHeight: 420,
+            transform: `scale(${zoom})`,
+            transformOrigin: "top left",
+            touchAction: "none",
+          }}
           onMouseDown={handlePointerDown}
           onMouseMove={handlePointerMove}
           onMouseUp={handlePointerEnd}
