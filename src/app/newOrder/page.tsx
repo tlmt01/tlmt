@@ -39,6 +39,8 @@ export default function NewJobOrder() {
 
   const [design, setDesign] = useState<Record<string, string>>({});
 
+  const [pieceType, setPieceType] = useState("Kurti");
+
   const resetForm = () => {
     setCustomer({
       name: "",
@@ -117,6 +119,7 @@ export default function NewJobOrder() {
 
       await addDoc(collection(firestore, "jobOrders"), {
         customer,
+        pieceType,
         measurements,
         design,
 
@@ -153,6 +156,9 @@ export default function NewJobOrder() {
       setLoading(false);
     }
   };
+
+  const title =
+    pieceType === "Blouse" ? "Blouse Measurements" : "Kurti Measurements";
 
   return (
     <div className="container-fluid py-4">
@@ -226,9 +232,7 @@ export default function NewJobOrder() {
                 }
               />
             </div>
-          </div>
 
-          <div className="row">
             <div className="col-md-3 mb-3">
               <label className="form-label">Bill No</label>
 
@@ -307,17 +311,34 @@ export default function NewJobOrder() {
                 }
               />
             </div>
+
+            <div className="col-md-3 mb-3">
+              <label className="form-label">Piece Type</label>
+              <select
+                className="form-select"
+                value={pieceType}
+                onChange={(e) => setPieceType(e.target.value)}
+              >
+                <option value="Kurti">Kurti</option>
+                <option value="Blouse">Blouse</option>
+              </select>
+            </div>
           </div>
           {/* ================= Measurements ================= */}
 
           <MeasurementForm
+            pieceType={pieceType}
             measurements={measurements}
             setMeasurements={setMeasurements}
           />
 
           {/* ================= Design ================= */}
 
-          <DesignSection design={design} setDesign={setDesign} />
+          <DesignSection
+            pieceType={pieceType}
+            design={design}
+            setDesign={setDesign}
+          />
 
           {/* ================= Payment Summary ================= */}
 

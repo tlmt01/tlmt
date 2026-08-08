@@ -48,6 +48,7 @@ export default function JobOrdersPage() {
   const [searchText, setSearchText] = useState("");
   const [selectedId, setSelectedId] = useState("");
   const [draftOrder, setDraftOrder] = useState(emptyDraft);
+  const [draftMeasurements, setDraftMeasurements] = useState({});
 
   useEffect(() => {
     if (!authReady) return;
@@ -116,6 +117,7 @@ export default function JobOrdersPage() {
   useEffect(() => {
     if (!selectedOrder) {
       setDraftOrder(emptyDraft);
+      setDraftMeasurements({});
       return;
     }
 
@@ -129,6 +131,17 @@ export default function JobOrdersPage() {
       totalAmount: String(selectedOrder.totalAmount ?? 0),
       status: selectedOrder.status || "Pending",
     });
+
+    setDraftMeasurements(
+      selectedOrder.measurements && typeof selectedOrder.measurements === "object"
+        ? Object.fromEntries(
+            Object.entries(selectedOrder.measurements).map(([key, value]) => [
+              key,
+              String(value ?? ""),
+            ]),
+          )
+        : {},
+    );
   }, [selectedOrder]);
 
   const summary = useMemo(() => {
@@ -155,6 +168,13 @@ export default function JobOrdersPage() {
     }));
   };
 
+  const changeMeasurement = (name, value) => {
+    setDraftMeasurements((current) => ({
+      ...current,
+      [name]: value,
+    }));
+  };
+
   const saveOrder = async (event) => {
     event.preventDefault();
     if (!selectedOrder) return;
@@ -168,6 +188,7 @@ export default function JobOrdersPage() {
         totalAmount: Number(draftOrder.totalAmount || 0),
         balance:
           Number(draftOrder.totalAmount || 0) - Number(draftOrder.advance || 0),
+        measurements: draftMeasurements,
         updatedAt: serverTimestamp(),
       };
 
@@ -488,21 +509,32 @@ export default function JobOrdersPage() {
                               <strong className="mb-0">Measurements</strong>
                             </div>
                             <div className="card-body p-3">
-                              {selectedOrder.measurements &&
-                              Object.keys(selectedOrder.measurements).length ? (
+                              {Object.keys(draftMeasurements).length ? (
                                 <div className="table-responsive">
                                   <table className="table table-sm mb-0">
                                     <tbody>
-                                      {Object.entries(
-                                        selectedOrder.measurements,
-                                      ).map(([key, value]) => (
-                                        <tr key={key}>
-                                          <td className="fw-semibold text-capitalize">
-                                            {key.replace(/([A-Z])/g, " $1")}
-                                          </td>
-                                          <td>{value}</td>
-                                        </tr>
-                                      ))}
+                                      {Object.entries(draftMeasurements).map(
+                                        ([key, value]) => (
+                                          <tr key={key}>
+                                            <td className="fw-semibold text-capitalize">
+                                              {key.replace(/([A-Z])/g, " $1")}
+                                            </td>
+                                            <td>
+                                              <input
+                                                type="text"
+                                                className="form-control form-control-sm"
+                                                value={value}
+                                                onChange={(event) =>
+                                                  changeMeasurement(
+                                                    key,
+                                                    event.target.value,
+                                                  )
+                                                }
+                                              />
+                                            </td>
+                                          </tr>
+                                        ),
+                                      )}
                                     </tbody>
                                   </table>
                                 </div>
