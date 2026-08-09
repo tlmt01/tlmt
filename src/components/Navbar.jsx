@@ -1,6 +1,7 @@
 "use client";
-import React, { useEffect } from "react";
+import React from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { deleteAllCookies } from "../modules/encryption";
 import {
@@ -24,6 +25,7 @@ export default function Navbar() {
     { label: "Home", href: "/" },
     { label: "Services", href: "/services" },
     { label: "Gallery", href: "/gallery" },
+    { label: "Track Order", href: "/trackOrder" },
     ...(isAdmin
       ? [
           // { label: "Add Customer", href: "/addCustomer" },
@@ -51,7 +53,7 @@ export default function Navbar() {
   return (
     <nav className="navbar navbar-expand-lg tlmt-navbar sticky-top shadow-sm">
       <div className="container">
-        <a className="navbar-brand d-flex align-items-center gap-3" href="/">
+        <Link className="navbar-brand d-flex align-items-center gap-3" href="/">
           <div className="tlmt-logo-wrapper rounded-circle overflow-hidden border border-2 border-warning shadow-sm">
             <Image
               src={logo}
@@ -68,7 +70,7 @@ export default function Navbar() {
               Inspired by your Fashion Sense
             </small>
           </div>
-        </a>
+        </Link>
         <button
           className="navbar-toggler border-0"
           type="button"
@@ -84,30 +86,33 @@ export default function Navbar() {
           <ul className="navbar-nav ms-auto align-items-lg-center gap-lg-2">
             {navItems.map((item) => (
               <li className="nav-item" key={item.label}>
-                <a className="nav-link px-3 py-2 rounded-pill" href={item.href}>
+                <Link
+                  className="nav-link px-3 py-2 rounded-pill"
+                  href={item.href}
+                >
                   {item.label}
-                </a>
+                </Link>
               </li>
             ))}
             {isLoggedIn ? (
               <>
                 <li className="nav-item">
-                  <a
+                  <Link
                     className="nav-link px-3 py-2 rounded-pill"
                     href="/dashboard"
                   >
                     <i className="bi bi-grid-1x2 me-2" />
                     Dashboard
-                  </a>
+                  </Link>
                 </li>
                 <li className="nav-item">
-                  <a
+                  <Link
                     className="nav-link px-3 py-2 rounded-pill"
                     href="/profile"
                   >
                     <i className="bi bi-person-gear me-2" />
                     Edit Profile
-                  </a>
+                  </Link>
                 </li>
                 <li className="nav-item ms-lg-2">
                   <span className="nav-link px-3 py-2">
@@ -129,17 +134,20 @@ export default function Navbar() {
             ) : (
               <>
                 <li className="nav-item">
-                  <a className="nav-link px-3 py-2 rounded-pill" href="/login">
+                  <Link
+                    className="nav-link px-3 py-2 rounded-pill"
+                    href="/login"
+                  >
                     Login
-                  </a>
+                  </Link>
                 </li>
                 <li className="nav-item ms-lg-2">
-                  <a
+                  <Link
                     className="btn btn-outline-dark rounded-pill px-3"
                     href="/contact"
                   >
                     <i className="bi bi-calendar-check me-2"></i>Appointment
-                  </a>
+                  </Link>
                 </li>
               </>
             )}
