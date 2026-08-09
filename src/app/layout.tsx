@@ -167,7 +167,7 @@ export const metadata: Metadata = {
 };
 <meta
   name="google-site-verification"
-  content="vQ_OuB0QvuO2I6sBHbH69UJPngQDel0g-KAAkNyrSmo"
+  content="meaUfcnzb0Sp9VhCzv8__pUhzxzFEOjJBz7ex2K_nC4"
 />;
 export default function RootLayout({
   children,
