@@ -47,10 +47,21 @@ const localBusinessSchema = {
 
   image: "https://tlmt.vercel.app/images/tlmt.jpg",
 
+  telephone: "+918105621013",
+
   description:
-    "Ladies tailoring and boutique offering custom stitching, designer blouses, bridal wear, kurti stitching, salwar suits, designer gowns, kids wear, alterations and saree fall & pico.",
+    "The Little Mango Tree is a ladies tailoring and boutique in Sompura, Bengaluru, offering designer blouse stitching, kurti stitching, bridal wear, salwar suits, designer gowns, alterations and custom ladies tailoring.",
 
   slogan: "Where Every Stitch Tells Your Story",
+
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: "Near Saty Sai Hospital Gate",
+    addressLocality: "Sompura, Bengaluru",
+    addressRegion: "Karnataka",
+    postalCode: "562125",
+    addressCountry: "IN",
+  },
 
   geo: {
     "@type": "GeoCoordinates",
@@ -61,10 +72,32 @@ const localBusinessSchema = {
   hasMap:
     "https://www.google.com/maps/place/The+Little+Mango+Tree+boutique/@12.863911,77.7685645,17z",
 
-  areaServed: {
-    "@type": "Place",
-    name: "Bengaluru",
-  },
+  openingHoursSpecification: [
+    {
+      "@type": "OpeningHoursSpecification",
+      dayOfWeek: [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+      ],
+      opens: "10:30",
+      closes: "20:00",
+    },
+  ],
+
+  areaServed: [
+    {
+      "@type": "City",
+      name: "Bengaluru",
+    },
+    {
+      "@type": "Place",
+      name: "Sompura",
+    },
+  ],
 
   makesOffer: [
     {
