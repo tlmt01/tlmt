@@ -130,7 +130,7 @@ export const metadata: Metadata = {
   title: "The Little Mango Tree",
   description: "Inspired by your Fashion Sense",
   verification: {
-    google: "vQ_OuB0QvuO2I6sBHbH69UJPngQDel0g-KAAkNyrSmo",
+    google: "meaUfcnzb0Sp9VhCzv8__pUhzxzFEOjJBz7ex2K_nC4",
   },
   keywords: [
     "The Little Mango Tree",
