@@ -165,7 +165,10 @@ export const metadata: Metadata = {
     type: "website",
   },
 };
-
+<meta
+  name="google-site-verification"
+  content="vQ_OuB0QvuO2I6sBHbH69UJPngQDel0g-KAAkNyrSmo"
+/>;
 export default function RootLayout({
   children,
 }: Readonly<{
