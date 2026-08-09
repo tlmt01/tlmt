@@ -14,6 +14,7 @@ import {
 } from "firebase/firestore";
 import { firestore } from "@/lib/firebase";
 import { useGlobalContext } from "@/context/Store";
+import { useFirebase } from "@/context/FirebaseContext";
 import Image from "next/image";
 
 const emptyForm = {
@@ -42,6 +43,9 @@ export default function RegUsersPage() {
   const [selectedPhone, setSelectedPhone] = useState("");
   const [formData, setFormData] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [selectedPhoto, setSelectedPhoto] = useState(null);
+  const [thumbnail, setThumbnail] = useState("");
+  const { uploadUserPhoto } = useFirebase();
 
   useEffect(() => {
     if (!authReady) return;
@@ -101,7 +105,16 @@ export default function RegUsersPage() {
     if (!selectedUser) return;
     setFormData({ ...emptyForm, ...selectedUser });
     setSelectedPhone(selectedUser.phone);
+    // clear any pending photo selection when switching users
+    setSelectedPhoto(null);
+    setThumbnail("");
   }, [selectedUser]);
+
+  useEffect(() => {
+    return () => {
+      if (thumbnail) URL.revokeObjectURL(thumbnail);
+    };
+  }, [thumbnail]);
 
   const handleChange = (event) => {
     const { name, value, type, checked } = event.target;
@@ -135,6 +148,27 @@ export default function RegUsersPage() {
 
     setSaving(true);
     try {
+      // If admin selected a new photo, upload it first and include url/photoPath
+      if (selectedPhoto) {
+        try {
+          const userIdForUpload =
+            selectedUser.id ||
+            selectedUser.phone ||
+            selectedUser.docId ||
+            formData.phone;
+          const uploaded = await uploadUserPhoto({
+            file: selectedPhoto,
+            userId: userIdForUpload,
+            oldPhotoPath: selectedUser.photoPath || "",
+            oldPhotoUrl: selectedUser.url || "",
+          });
+          if (uploaded?.url) payload.url = uploaded.url;
+          if (uploaded?.photoPath) payload.photoPath = uploaded.photoPath;
+        } catch (err) {
+          console.warn("Photo upload failed", err);
+          toast.warning("Photo upload failed, continuing without new photo.");
+        }
+      }
       const oldPhone = selectedUser.phone;
       const oldRef = doc(
         firestore,
@@ -263,11 +297,11 @@ export default function RegUsersPage() {
           <div className="col-lg-8">
             <form className="admin-form-card" onSubmit={handleSave}>
               <div className="d-flex flex-column align-items-center">
-                {formData.url && (
+                {(thumbnail || formData.url) && (
                   <>
                     <div className="mb-2">
                       <Image
-                        src={formData.url}
+                        src={thumbnail || formData.url}
                         alt="Profile Photo"
                         width={100}
                         height={100}
@@ -365,6 +399,34 @@ export default function RegUsersPage() {
                     value={formData.photoPath}
                     onChange={handleChange}
                     className="form-control"
+                  />
+                </div>
+
+                <div className="col-md-6">
+                  <label className="form-label">Change Photo (admin)</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="form-control"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      if (!file.type.startsWith("image/")) {
+                        toast.error("Please choose an image file.");
+                        e.target.value = "";
+                        return;
+                      }
+                      if (file.size > 10 * 1024 * 1024) {
+                        toast.error(
+                          "Please choose an image smaller than 10 MB.",
+                        );
+                        e.target.value = "";
+                        return;
+                      }
+                      if (thumbnail) URL.revokeObjectURL(thumbnail);
+                      setSelectedPhoto(file);
+                      setThumbnail(URL.createObjectURL(file));
+                    }}
                   />
                 </div>
 

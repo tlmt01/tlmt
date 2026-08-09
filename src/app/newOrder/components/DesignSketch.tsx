@@ -177,6 +177,36 @@ export default function DesignSketch({ drawingDataUrl, onChange }: Props) {
     onChange(history[nextIndex]);
   };
 
+  useEffect(() => {
+    const isEditableElement = (target: EventTarget | null) => {
+      if (!(target instanceof HTMLElement)) return false;
+      const tagName = target.tagName.toLowerCase();
+      return (
+        tagName === "input" ||
+        tagName === "textarea" ||
+        tagName === "select" ||
+        target.isContentEditable
+      );
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (!event.ctrlKey || event.altKey || event.metaKey) return;
+      if (isEditableElement(event.target)) return;
+
+      const key = event.key.toLowerCase();
+      if (key === "x" || key === "z") {
+        event.preventDefault();
+        undo();
+      } else if (key === "y") {
+        event.preventDefault();
+        redo();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown, true);
+    return () => document.removeEventListener("keydown", handleKeyDown, true);
+  }, [undo, redo]);
+
   const handleUploadClick = () => {
     fileInputRef.current?.click();
   };

@@ -1,9 +1,23 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { decryptData, deleteCookie, getCookie } from "../modules/encryption";
+import {
+  decryptData,
+  deleteCookie,
+  getCookie,
+  encryptObjData,
+} from "../modules/encryption";
 
 import { FirebaseProvider } from "./FirebaseContext";
+import {
+  doc,
+  getDoc,
+  collection,
+  query,
+  where,
+  getDocs,
+} from "firebase/firestore";
+import { firestore } from "@/lib/firebase";
 
 export const initialSessionState = {
   loggedIn: false,
@@ -60,7 +74,7 @@ export const GlobalContextProvider = ({ children }) => {
   const [stateObject, setStateObject] = useState({});
 
   useEffect(() => {
-    const restoreSession = () => {
+    const restoreSession = async () => {
       try {
         const encryptedUser = getCookie("user");
         const savedSession = window.localStorage.getItem(SESSION_STORAGE_KEY);
@@ -76,14 +90,65 @@ export const GlobalContextProvider = ({ children }) => {
           return;
         }
 
+        // Try to fetch the authoritative user record directly from Firestore
+        let serverUser = null;
+        try {
+          const idOrPhone = savedUser.id || savedUser.phone || "";
+          if (idOrPhone) {
+            // Try primary document by ID first
+            const userRef = doc(firestore, "users", idOrPhone);
+            const primaryDoc = await getDoc(userRef);
+            if (primaryDoc.exists()) {
+              serverUser = {
+                docId: primaryDoc.id,
+                ...primaryDoc.data(),
+                id: primaryDoc.data().id || primaryDoc.id,
+              };
+            } else {
+              const usersRef = collection(firestore, "users");
+              const idQuery = query(usersRef, where("id", "==", idOrPhone));
+              const snapshot = await getDocs(idQuery);
+              if (!snapshot.empty) {
+                const firstMatch = snapshot.docs[0];
+                serverUser = {
+                  docId: firstMatch.id,
+                  ...firstMatch.data(),
+                  id: firstMatch.data().id || firstMatch.id,
+                };
+              } else {
+                const phoneQuery = query(
+                  usersRef,
+                  where("phone", "==", idOrPhone),
+                );
+                const phoneSnap = await getDocs(phoneQuery);
+                if (!phoneSnap.empty) {
+                  const first = phoneSnap.docs[0];
+                  serverUser = {
+                    docId: first.id,
+                    ...first.data(),
+                    id: first.data().id || first.id,
+                  };
+                }
+              }
+            }
+          }
+        } catch {}
+
+        const effectiveUser = serverUser || savedUser;
+
         const normalizedUser = {
           ...emptyUser,
-          ...savedUser,
+          ...effectiveUser,
           loggedIn: true,
-          userType: savedUser.userType || "customer",
-          desig: savedUser.desig || "customer",
+          userType: effectiveUser.userType || "customer",
+          desig: effectiveUser.desig || "customer",
           authReady: true,
         };
+
+        // update cookie + localStorage so client reflects server-side changes
+        try {
+          encryptObjData("user", normalizedUser, 15 * 24 * 60);
+        } catch {}
 
         setUSER(normalizedUser);
         setState({

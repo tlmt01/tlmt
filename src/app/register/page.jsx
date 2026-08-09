@@ -11,6 +11,7 @@ import { useFirebase } from "../../context/FirebaseContext";
 import logo from "../../images/tlmt.jpg";
 import styles from "../login/login.module.css";
 import { v4 as uuid } from "uuid";
+import { generateID } from "../../modules/calculatefunctions";
 
 export default function RegisterPage() {
   return (
@@ -41,7 +42,7 @@ function RegisterPageContent() {
   const [userType] = useState("customer");
   const [desig] = useState("customer");
   const [disabled] = useState(false);
-  const [empid] = useState(uuid().split("-")[0]);
+  const [empid] = useState(generateID());
   const [photoUploading, setPhotoUploading] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
   const [cropSource, setCropSource] = useState("");

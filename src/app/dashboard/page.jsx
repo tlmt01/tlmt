@@ -53,7 +53,6 @@ export default function DashboardPage() {
           text: "Add an email for appointment updates.",
         },
   ];
-
   return (
     <main className={styles.dashboard}>
       <section className={styles.hero}>
@@ -104,7 +103,11 @@ export default function DashboardPage() {
             <strong>{name}</strong>
           </div>
           <span className={styles.memberBadge}>
-            <i className="bi bi-heart-fill" /> {USER?.userType || "Style"}
+            <i className="bi bi-heart-fill" /> {USER?.userType || "Style"}{" "}
+            {USER?.userType?.toLowerCase() !== `customer` &&
+            USER?.userType?.toLowerCase() !== `worker`
+              ? USER?.desig?.toUpperCase()
+              : ""}
           </span>
         </div>
         <div className={styles.sectionHeading}>
