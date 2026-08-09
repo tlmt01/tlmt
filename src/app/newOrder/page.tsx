@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   collection,
   addDoc,
@@ -9,6 +9,9 @@ import {
   getDoc,
   setDoc,
   updateDoc,
+  getDocs,
+  query,
+  where,
 } from "firebase/firestore";
 import { getDownloadURL, ref, uploadString } from "firebase/storage";
 
@@ -42,6 +45,8 @@ export default function NewJobOrder() {
 
   const [design, setDesign] = useState<Record<string, string>>({});
   const [designSketchUrl, setDesignSketchUrl] = useState("");
+  const [workers, setWorkers] = useState([]);
+  const [assignedWorkers, setAssignedWorkers] = useState([]);
 
   const [pieceType, setPieceType] = useState("Kurti");
 
@@ -127,6 +132,11 @@ export default function NewJobOrder() {
         pieceType,
         measurements,
         design,
+        // worker assignments
+        assignedWorkers,
+        assignedWorkerIds: assignedWorkers.map(
+          (w) => w.id || w.phone || w.docId,
+        ),
 
         orderNo,
 
@@ -171,6 +181,41 @@ export default function NewJobOrder() {
       alert("Something went wrong.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const loadWorkers = async () => {
+      try {
+        const usersRef = collection(firestore, "users");
+        const q = query(usersRef, where("userType", "==", "worker"));
+        const snap = await getDocs(q);
+        const rows = snap.docs.map((d) => ({ docId: d.id, ...d.data() }));
+        setWorkers(rows);
+      } catch (err) {
+        console.warn("Unable to load workers", err);
+      }
+    };
+
+    loadWorkers();
+  }, []);
+
+  const toggleAssignWorker = (worker) => {
+    const exists = assignedWorkers.find(
+      (w) =>
+        (w.docId || w.id || w.phone) ===
+        (worker.docId || worker.id || worker.phone),
+    );
+    if (exists) {
+      setAssignedWorkers((cur) =>
+        cur.filter(
+          (w) =>
+            (w.docId || w.id || w.phone) !==
+            (worker.docId || worker.id || worker.phone),
+        ),
+      );
+    } else {
+      setAssignedWorkers((cur) => [...cur, worker]);
     }
   };
 
@@ -341,6 +386,43 @@ export default function NewJobOrder() {
               </select>
             </div>
           </div>
+          {/* ================= Assign Workers ================= */}
+          <div className="card border-0 shadow-sm mb-4">
+            <div className="card-header bg-secondary text-white fw-bold">
+              Assign Workers (optional)
+            </div>
+            <div className="card-body">
+              {workers.length === 0 ? (
+                <div className="text-muted">No workers available.</div>
+              ) : (
+                <div className="d-flex flex-wrap gap-2">
+                  {workers.map((w) => {
+                    const key = w.docId || w.id || w.phone;
+                    const active = assignedWorkers.find(
+                      (aw) => (aw.docId || aw.id || aw.phone) === key,
+                    );
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => toggleAssignWorker(w)}
+                        className={`btn btn-sm ${active ? "btn-primary" : "btn-outline-primary"}`}
+                      >
+                        {w.name || w.empid || w.phone}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+              {assignedWorkers.length ? (
+                <div className="mt-3 small text-muted">
+                  Assigned:{" "}
+                  {assignedWorkers.map((w) => w.name || w.phone).join(", ")}
+                </div>
+              ) : null}
+            </div>
+          </div>
+
           {/* ================= Measurements ================= */}
 
           <MeasurementForm

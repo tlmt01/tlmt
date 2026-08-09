@@ -9,6 +9,7 @@ import {
   doc,
   getDocs,
   query,
+  where,
   serverTimestamp,
   updateDoc,
 } from "firebase/firestore";
@@ -53,6 +54,8 @@ export default function JobOrdersPage() {
   const [draftMeasurements, setDraftMeasurements] = useState({});
   const [isEditingSketch, setIsEditingSketch] = useState(false);
   const [editingSketchUrl, setEditingSketchUrl] = useState("");
+  const [workers, setWorkers] = useState([]);
+  const [draftAssignedWorkers, setDraftAssignedWorkers] = useState([]);
 
   useEffect(() => {
     if (!authReady) return;
@@ -151,6 +154,7 @@ export default function JobOrdersPage() {
     );
     setIsEditingSketch(false);
     setEditingSketchUrl(selectedOrder.designSketchUrl || "");
+    setDraftAssignedWorkers(selectedOrder.assignedWorkers || []);
   }, [selectedOrder]);
 
   const summary = useMemo(() => {
@@ -198,6 +202,11 @@ export default function JobOrdersPage() {
         balance:
           Number(draftOrder.totalAmount || 0) - Number(draftOrder.advance || 0),
         measurements: draftMeasurements,
+        // worker assignments
+        assignedWorkers: draftAssignedWorkers,
+        assignedWorkerIds: (draftAssignedWorkers || []).map(
+          (w) => w.id || w.phone || w.docId,
+        ),
         updatedAt: serverTimestamp(),
       };
 
@@ -240,6 +249,36 @@ export default function JobOrdersPage() {
       toast.error("Unable to save the order. Please try again.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const loadWorkers = async () => {
+      try {
+        const usersRef = collection(firestore, "users");
+        const q = query(usersRef, where("userType", "==", "worker"));
+        const snap = await getDocs(q);
+        const rows = snap.docs.map((d) => ({ docId: d.id, ...d.data() }));
+        setWorkers(rows);
+      } catch (err) {
+        console.warn("Unable to load workers", err);
+      }
+    };
+
+    if (isAdmin) loadWorkers();
+  }, [isAdmin]);
+
+  const toggleAssignWorker = (worker) => {
+    const key = worker.docId || worker.id || worker.phone;
+    const exists = draftAssignedWorkers.find(
+      (w) => (w.docId || w.id || w.phone) === key,
+    );
+    if (exists) {
+      setDraftAssignedWorkers((cur) =>
+        cur.filter((w) => (w.docId || w.id || w.phone) !== key),
+      );
+    } else {
+      setDraftAssignedWorkers((cur) => [...cur, worker]);
     }
   };
 
@@ -512,6 +551,49 @@ export default function JobOrdersPage() {
                             </p>
                           </div>
                         </div>
+
+                        <div className="card border-0 shadow-sm mt-3">
+                          <div className="card-header bg-white">
+                            <strong className="mb-0">Assigned workers</strong>
+                          </div>
+                          <div className="card-body p-3">
+                            {workers.length === 0 ? (
+                              <div className="text-muted">
+                                No workers available.
+                              </div>
+                            ) : (
+                              <div className="d-flex flex-wrap gap-2">
+                                {workers.map((w) => {
+                                  const key = w.docId || w.id || w.phone;
+                                  const active = draftAssignedWorkers.find(
+                                    (aw) =>
+                                      (aw.docId || aw.id || aw.phone) === key,
+                                  );
+                                  return (
+                                    <button
+                                      key={key}
+                                      type="button"
+                                      onClick={() => toggleAssignWorker(w)}
+                                      className={`btn btn-sm ${active ? "btn-primary" : "btn-outline-primary"}`}
+                                    >
+                                      {w.name || w.empid || w.phone}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            )}
+
+                            {draftAssignedWorkers.length ? (
+                              <div className="mt-2 small text-muted">
+                                Assigned:{" "}
+                                {draftAssignedWorkers
+                                  .map((w) => w.name || w.phone)
+                                  .join(", ")}
+                              </div>
+                            ) : null}
+                          </div>
+                        </div>
+
                         <div className="col-lg-6">
                           <div className="card border-0 bg-light p-3 h-100">
                             <div className="mb-2">

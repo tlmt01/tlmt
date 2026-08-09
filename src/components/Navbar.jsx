@@ -30,7 +30,11 @@ export default function Navbar() {
           { label: "New Order", href: "/newOrder" },
           { label: "Manage Orders", href: "/jobOrders" },
           { label: "Manage Users", href: "/regUsers" },
+          { label: "Add Worker", href: "/addWorker" },
         ]
+      : []),
+    ...(state?.userType === "worker" || isAdmin
+      ? [{ label: "My Jobs", href: "/viewMyJob" }]
       : []),
   ];
 
