@@ -17,6 +17,7 @@ import { getDownloadURL, ref, uploadString } from "firebase/storage";
 import { firestore, storage } from "@/lib/firebase";
 import { useGlobalContext } from "@/context/Store";
 import DesignSketch from "@/app/newOrder/components/DesignSketch";
+import { upsertOrderAccountEntry } from "@/lib/accounts";
 
 const statusOptions = [
   "Pending",
@@ -298,6 +299,13 @@ export default function JobOrdersPage() {
           await updateDoc(orderRef, { designSketchUrl });
         }
       }
+
+      await upsertOrderAccountEntry({
+        ...selectedOrder,
+        ...payload,
+        docId: selectedOrder.docId,
+        designSketchUrl,
+      });
 
       const updatedOrder = {
         ...selectedOrder,

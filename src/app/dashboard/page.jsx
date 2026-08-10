@@ -24,6 +24,12 @@ const shortcuts = [
     text: "Save inspiration for later.",
     href: "/gallery",
   },
+  {
+    icon: "bi-wallet2",
+    title: "Manage accounts",
+    text: "Track balances, income, and expenses beautifully.",
+    href: "/accounts",
+  },
 ];
 
 export default function DashboardPage() {

@@ -1,0 +1,334 @@
+.page {
+  min-height: calc(100vh - 108px);
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: clamp(1rem, 3vw, 2.2rem);
+  color: #3f2d24;
+}
+
+.hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: clamp(1.6rem, 4vw, 2.8rem);
+  border-radius: 26px;
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(255, 214, 102, 0.28),
+      transparent 20%
+    ),
+    linear-gradient(135deg, #4a220f, #9b3f1a 55%, #c9782b);
+  color: #fffaf3;
+  box-shadow: 0 20px 48px rgba(83, 38, 18, 0.2);
+}
+
+.hero h1 {
+  margin: 0 0 0.9rem;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(2rem, 3.4vw, 2.9rem);
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}
+
+.hero p {
+  max-width: 650px;
+  margin: 0;
+  color: rgba(255, 247, 235, 0.9);
+  line-height: 1.75;
+}
+
+.eyebrow {
+  margin: 0 0 0.8rem;
+  color: #ffd37a;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.heroActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  margin-top: 1.2rem;
+}
+
+.secondaryLink,
+.syncButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.7rem 1rem;
+  border-radius: 999px;
+  background: rgba(255, 250, 243, 0.92);
+  color: #8a3e18;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+}
+
+.syncButton:disabled {
+  opacity: 0.75;
+  cursor: wait;
+}
+
+.liveBadge,
+.softBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.65rem 0.8rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff4dd;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.heroCard {
+  min-width: min(300px, 100%);
+  padding: 1.2rem 1.2rem 1.1rem;
+  border-radius: 20px;
+  background: rgba(255, 250, 244, 0.92);
+  color: #5d2c16;
+  box-shadow: inset 0 0 0 1px rgba(167, 74, 19, 0.15);
+}
+
+.label,
+.cardEyebrow {
+  display: block;
+  margin-bottom: 0.45rem;
+  color: #a85f25;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.heroCard strong {
+  display: block;
+  font-size: clamp(1.5rem, 2.4vw, 2.1rem);
+  color: #822f0d;
+}
+
+.heroCard p {
+  margin-top: 0.55rem;
+  color: #7a4b2d;
+}
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1.2rem;
+}
+
+.summaryCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.85rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid #f0e1d5;
+  border-radius: 16px;
+  background: linear-gradient(145deg, #fffdfa, #fff5ea);
+  box-shadow: 0 10px 30px rgba(104, 51, 23, 0.05);
+}
+
+.summaryCard span {
+  display: block;
+  color: #9f7a64;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.summaryCard strong {
+  display: block;
+  margin-top: 0.25rem;
+  color: #5f3422;
+  font-size: 1rem;
+}
+
+.summaryCard i {
+  font-size: 1.3rem;
+  color: #c16a24;
+}
+
+.contentGrid {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.formCard,
+.listCard {
+  padding: 1.2rem;
+  border: 1px solid #f0e1d5;
+  border-radius: 20px;
+  background: #fffdfa;
+  box-shadow: 0 12px 28px rgba(104, 51, 23, 0.06);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+}
+
+.cardHeader h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  color: #523227;
+}
+
+.formCard label {
+  display: grid;
+  gap: 0.4rem;
+  margin-bottom: 0.8rem;
+}
+
+.formCard span {
+  color: #8b6552;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.formCard input,
+.formCard select {
+  width: 100%;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid #ecd9cb;
+  border-radius: 12px;
+  background: #fffdfb;
+  color: #4b2b1e;
+}
+
+.inlineFields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.formCard button {
+  width: 100%;
+  padding: 0.9rem 1rem;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #a5441a, #da7e24);
+  color: #fffdfa;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.transactionList {
+  display: grid;
+  gap: 0.7rem;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.transactionList li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid #f2e3d8;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #fffdfb, #fef6eb);
+}
+
+.transactionList strong {
+  display: block;
+  color: #4e2e21;
+}
+
+.transactionList span {
+  color: #967866;
+  font-size: 0.76rem;
+}
+
+.transactionMeta {
+  display: grid;
+  justify-items: end;
+  gap: 0.35rem;
+}
+
+.orderMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.35rem;
+}
+
+.orderMeta span {
+  padding: 0.25rem 0.45rem;
+  border-radius: 999px;
+  background: #fff2e2;
+  color: #8b4a24;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.income {
+  color: #2f7c45;
+  font-weight: 700;
+}
+
+.expense {
+  color: #b63825;
+  font-weight: 700;
+}
+
+.transactionMeta button {
+  border: none;
+  background: transparent;
+  color: #9b4d2c;
+  font-size: 0.74rem;
+  cursor: pointer;
+  padding: 0;
+}
+
+@media (max-width: 960px) {
+  .summaryGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .contentGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .hero {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .summaryGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .inlineFields {
+    grid-template-columns: 1fr;
+  }
+
+  .transactionList li {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .transactionMeta {
+    justify-items: start;
+  }
+}

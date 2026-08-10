@@ -22,6 +22,16 @@ import CustomerSearch, { Customer } from "./components/CustomerSearch";
 import MeasurementForm from "./components/MeasurementForm";
 import DesignSection from "./components/DesignSection";
 import DesignSketch from "./components/DesignSketch";
+import { upsertOrderAccountEntry } from "@/lib/accounts";
+
+interface Worker {
+  docId: string;
+  id?: string;
+  phone?: string;
+  name?: string;
+  empid?: string;
+  [key: string]: any;
+}
 
 export default function NewJobOrder() {
   const [loading, setLoading] = useState(false);
@@ -45,8 +55,8 @@ export default function NewJobOrder() {
 
   const [design, setDesign] = useState<Record<string, string>>({});
   const [designSketchUrl, setDesignSketchUrl] = useState("");
-  const [workers, setWorkers] = useState([]);
-  const [assignedWorkers, setAssignedWorkers] = useState([]);
+  const [workers, setWorkers] = useState<Worker[]>([]);
+  const [assignedWorkers, setAssignedWorkers] = useState<Worker[]>([]);
 
   const [pieceType, setPieceType] = useState("Kurti");
 
@@ -170,6 +180,18 @@ export default function NewJobOrder() {
         });
       }
 
+      await upsertOrderAccountEntry({
+        docId: docRef.id,
+        orderNo,
+        bookingDate: orderInfo.bookingDate,
+        deliveryDate: orderInfo.deliveryDate,
+        advance: Number(orderInfo.advance || 0),
+        totalAmount: Number(orderInfo.totalAmount || 0),
+        balance:
+          Number(orderInfo.totalAmount || 0) - Number(orderInfo.advance || 0),
+        status: "Pending",
+      });
+
       await saveCustomer();
 
       alert("Job Order Saved Successfully");
@@ -200,19 +222,14 @@ export default function NewJobOrder() {
     loadWorkers();
   }, []);
 
-  const toggleAssignWorker = (worker) => {
+  const toggleAssignWorker = (worker: Worker) => {
+    const workerKey = worker.docId || worker.id || worker.phone;
     const exists = assignedWorkers.find(
-      (w) =>
-        (w.docId || w.id || w.phone) ===
-        (worker.docId || worker.id || worker.phone),
+      (w) => (w.docId || w.id || w.phone) === workerKey,
     );
     if (exists) {
       setAssignedWorkers((cur) =>
-        cur.filter(
-          (w) =>
-            (w.docId || w.id || w.phone) !==
-            (worker.docId || worker.id || worker.phone),
-        ),
+        cur.filter((w) => (w.docId || w.id || w.phone) !== workerKey),
       );
     } else {
       setAssignedWorkers((cur) => [...cur, worker]);

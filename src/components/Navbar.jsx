@@ -121,6 +121,18 @@ export default function Navbar() {
                     Dashboard
                   </Link>
                 </li>
+                {isAdmin ? (
+                  <li className="nav-item">
+                    <Link
+                      className="nav-link px-3 py-2 rounded-pill"
+                      href="/accounts"
+                      onClick={closeNavbar}
+                    >
+                      <i className="bi bi-wallet2 me-2" />
+                      Accounts
+                    </Link>
+                  </li>
+                ) : null}
                 <li className="nav-item">
                   <Link
                     className="nav-link px-3 py-2 rounded-pill"
