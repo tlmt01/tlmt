@@ -44,7 +44,6 @@ const bodyFields = [
   "AEL",
   "Bust Point",
   "Waist Length",
-  "Slit Length",
   "Front Neck",
   "Back Neck",
 ];
