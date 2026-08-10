@@ -49,6 +49,7 @@ export default function JobOrdersPage() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchText, setSearchText] = useState("");
+  const [dateFilter, setDateFilter] = useState("all");
   const [selectedId, setSelectedId] = useState("");
   const [draftOrder, setDraftOrder] = useState(emptyDraft);
   const [draftMeasurements, setDraftMeasurements] = useState({});
@@ -96,11 +97,77 @@ export default function JobOrdersPage() {
     loadOrders();
   }, [authReady, isAdmin, router, state?.loggedIn]);
 
+  const isDateInFilter = (dateStr, filter) => {
+    if (!filter || filter === "all") return true;
+    if (!dateStr) return false;
+    const d = new Date(dateStr);
+    if (Number.isNaN(d.getTime())) return false;
+
+    const startOfDay = (dt) =>
+      new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
+    const today = startOfDay(new Date());
+
+    if (filter === "today") {
+      return startOfDay(d).getTime() === today.getTime();
+    }
+
+    // week starting sunday
+    const day = today.getDay();
+    const weekStart = new Date(today);
+    weekStart.setDate(today.getDate() - day);
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 6);
+
+    if (filter === "thisWeek") {
+      return (
+        startOfDay(d) >= startOfDay(weekStart) &&
+        startOfDay(d) <= startOfDay(weekEnd)
+      );
+    }
+
+    if (filter === "nextWeek") {
+      const nextStart = new Date(weekStart);
+      nextStart.setDate(weekStart.getDate() + 7);
+      const nextEnd = new Date(nextStart);
+      nextEnd.setDate(nextStart.getDate() + 6);
+      return (
+        startOfDay(d) >= startOfDay(nextStart) &&
+        startOfDay(d) <= startOfDay(nextEnd)
+      );
+    }
+
+    if (filter === "thisMonth") {
+      const first = new Date(today.getFullYear(), today.getMonth(), 1);
+      const last = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+      return (
+        startOfDay(d) >= startOfDay(first) && startOfDay(d) <= startOfDay(last)
+      );
+    }
+
+    if (filter === "nextMonth") {
+      const first = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+      const last = new Date(today.getFullYear(), today.getMonth() + 2, 0);
+      return (
+        startOfDay(d) >= startOfDay(first) && startOfDay(d) <= startOfDay(last)
+      );
+    }
+
+    return true;
+  };
+
   const filteredOrders = useMemo(() => {
     const needle = searchText.trim().toLowerCase();
-    if (!needle) return orders;
 
-    return orders.filter((order) => {
+    // apply date filter first
+    const dateFiltered = orders.filter((order) => {
+      // prefer deliveryDate, fallback to bookingDate
+      const dateStr = order.deliveryDate || order.bookingDate || "";
+      return isDateInFilter(dateStr, dateFilter);
+    });
+
+    if (!needle) return dateFiltered;
+
+    return dateFiltered.filter((order) => {
       const text = [
         order.orderNo,
         order.billNo,
@@ -114,7 +181,7 @@ export default function JobOrdersPage() {
 
       return text.includes(needle);
     });
-  }, [orders, searchText]);
+  }, [orders, searchText, dateFilter]);
 
   const selectedOrder =
     orders.find((order) => order.docId === selectedId) ||
@@ -351,6 +418,26 @@ export default function JobOrdersPage() {
                     onChange={(event) => setSearchText(event.target.value)}
                     aria-label="Search job orders"
                   />
+                </div>
+
+                <div className="mb-3 d-flex flex-wrap gap-2">
+                  {[
+                    ["all", "All"],
+                    ["today", "Today"],
+                    ["thisWeek", "This week"],
+                    ["nextWeek", "Next week"],
+                    ["thisMonth", "This month"],
+                    ["nextMonth", "Next month"],
+                  ].map(([key, label]) => (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => setDateFilter(key)}
+                      className={`btn btn-sm ${dateFilter === key ? "btn-primary" : "btn-outline-secondary"}`}
+                    >
+                      {label}
+                    </button>
+                  ))}
                 </div>
 
                 <div

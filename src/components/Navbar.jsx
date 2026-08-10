@@ -50,6 +50,20 @@ export default function Navbar() {
     router.replace("/login");
   };
 
+  const closeNavbar = () => {
+    try {
+      const el = document.getElementById("tlmtNavbar");
+      if (!el) return;
+      if (el.classList.contains("show")) {
+        el.classList.remove("show");
+        const toggler = document.querySelector(".navbar-toggler");
+        if (toggler) toggler.setAttribute("aria-expanded", "false");
+      }
+    } catch (err) {
+      // ignore
+    }
+  };
+
   return (
     <nav className="navbar navbar-expand-lg tlmt-navbar sticky-top shadow-sm">
       <div className="container">
@@ -89,6 +103,7 @@ export default function Navbar() {
                 <Link
                   className="nav-link px-3 py-2 rounded-pill"
                   href={item.href}
+                  onClick={closeNavbar}
                 >
                   {item.label}
                 </Link>
@@ -100,6 +115,7 @@ export default function Navbar() {
                   <Link
                     className="nav-link px-3 py-2 rounded-pill"
                     href="/dashboard"
+                    onClick={closeNavbar}
                   >
                     <i className="bi bi-grid-1x2 me-2" />
                     Dashboard
@@ -109,6 +125,7 @@ export default function Navbar() {
                   <Link
                     className="nav-link px-3 py-2 rounded-pill"
                     href="/profile"
+                    onClick={closeNavbar}
                   >
                     <i className="bi bi-person-gear me-2" />
                     Edit Profile
@@ -123,7 +140,10 @@ export default function Navbar() {
                 <li className="nav-item">
                   <button
                     type="button"
-                    onClick={logout}
+                    onClick={() => {
+                      closeNavbar();
+                      logout();
+                    }}
                     className="btn btn-outline-danger rounded-pill px-3"
                   >
                     <i className="bi bi-box-arrow-right me-2" />
@@ -137,6 +157,7 @@ export default function Navbar() {
                   <Link
                     className="nav-link px-3 py-2 rounded-pill"
                     href="/login"
+                    onClick={closeNavbar}
                   >
                     Login
                   </Link>
@@ -145,6 +166,7 @@ export default function Navbar() {
                   <Link
                     className="btn btn-outline-dark rounded-pill px-3"
                     href="/contact"
+                    onClick={closeNavbar}
                   >
                     <i className="bi bi-calendar-check me-2"></i>Appointment
                   </Link>

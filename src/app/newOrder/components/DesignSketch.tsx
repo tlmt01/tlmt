@@ -207,8 +207,14 @@ export default function DesignSketch({ drawingDataUrl, onChange }: Props) {
     return () => document.removeEventListener("keydown", handleKeyDown, true);
   }, [undo, redo]);
 
+  const cameraInputRef = useRef<HTMLInputElement | null>(null);
+
   const handleUploadClick = () => {
     fileInputRef.current?.click();
+  };
+
+  const handleCameraClick = () => {
+    cameraInputRef.current?.click();
   };
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -303,6 +309,13 @@ export default function DesignSketch({ drawingDataUrl, onChange }: Props) {
         </button>
         <button
           type="button"
+          className="btn btn-outline-secondary"
+          onClick={handleCameraClick}
+        >
+          Open Camera
+        </button>
+        <button
+          type="button"
           className="btn btn-outline-danger"
           onClick={clearCanvas}
         >
@@ -342,6 +355,14 @@ export default function DesignSketch({ drawingDataUrl, onChange }: Props) {
         ref={fileInputRef}
         type="file"
         accept="image/*"
+        style={{ display: "none" }}
+        onChange={handleImageUpload}
+      />
+      <input
+        ref={cameraInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
         style={{ display: "none" }}
         onChange={handleImageUpload}
       />
