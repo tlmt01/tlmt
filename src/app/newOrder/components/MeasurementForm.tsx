@@ -62,9 +62,12 @@ export default function MeasurementForm({
       <div className="card-header bg-success text-white fw-bold">{title}</div>
 
       <div className="card-body">
-        <div className="row g-3">
+        <div className="row g-2">
           {fields.map((field) => (
-            <div key={field} className="col-xl-3 col-lg-4 col-md-6">
+            <div
+              key={field}
+              className="d-flex flex-row col-xl-3 col-lg-4 col-md-6 justify-content-between align-items-center gap-2"
+            >
               <label className="form-label fw-semibold small">{field}</label>
 
               <input
@@ -89,7 +92,7 @@ export default function MeasurementForm({
 
   return (
     <>
-      <div className="row g-4">
+      <div className="row g-2">
         <div className="col-md-6 col-12">
           {renderFields(measurementTitle, kurtiFields)}
         </div>
@@ -98,7 +101,7 @@ export default function MeasurementForm({
         </div>
       </div>
 
-      <div className="row g-4">
+      <div className="row g-2">
         <div className="col-md-6 col-12">
           {renderFields("Sleeve Measurements", sleeveFields)}
         </div>
