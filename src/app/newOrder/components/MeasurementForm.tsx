@@ -12,7 +12,7 @@ const kurtiFields = [
   "Chest",
   "Waist",
   "Hip",
-  "Slit",
+  "Slit Length",
   "Cross Front",
   "Cross Back",
   "Bust Width",
@@ -58,19 +58,20 @@ export default function MeasurementForm({
     pieceType === "Blouse" ? "Blouse Measurements" : "Kurti Measurements";
 
   const renderFields = (title: string, fields: string[]) => (
-    <div className="card shadow-sm border-0 mb-4">
+    <div className="card shadow-sm border-0 h-100 mb-4">
       <div className="card-header bg-success text-white fw-bold">{title}</div>
 
       <div className="card-body">
-        <div className="row">
+        <div className="row g-3">
           {fields.map((field) => (
-            <div key={field} className="col-lg-4 col-md-6 mb-3">
-              <label className="form-label fw-semibold">{field}</label>
+            <div key={field} className="col-xl-3 col-lg-4 col-md-6">
+              <label className="form-label fw-semibold small">{field}</label>
 
               <input
                 type="text"
-                className="form-control"
+                className="form-control form-control-sm"
                 placeholder="Inch"
+                style={{ maxWidth: "120px" }}
                 value={measurements[field] || ""}
                 onChange={(e) =>
                   setMeasurements((prev) => ({
@@ -88,13 +89,23 @@ export default function MeasurementForm({
 
   return (
     <>
-      {renderFields(measurementTitle, kurtiFields)}
+      <div className="row g-4">
+        <div className="col-md-6 col-12">
+          {renderFields(measurementTitle, kurtiFields)}
+        </div>
+        <div className="col-md-6 col-12">
+          {renderFields("Body Measurements", bodyFields)}
+        </div>
+      </div>
 
-      {renderFields("Sleeve Measurements", sleeveFields)}
-
-      {renderFields("Salwar Measurements", salwarFields)}
-
-      {renderFields("Body Measurements", bodyFields)}
+      <div className="row g-4">
+        <div className="col-md-6 col-12">
+          {renderFields("Sleeve Measurements", sleeveFields)}
+        </div>
+        <div className="col-md-6 col-12">
+          {renderFields("Salwar Measurements", salwarFields)}
+        </div>
+      </div>
     </>
   );
 }
