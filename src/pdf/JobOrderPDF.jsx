@@ -999,6 +999,11 @@ export function JobOrderPDF({ order }) {
               <View style={styles.measurementHeader}>
                 <View style={styles.kurtaHeader}>
                   <Text>Kurta / Blouse</Text>
+                  {order?.pieceType === "Kurti" ? (
+                    <Text>Kurti</Text>
+                  ) : (
+                    <Text>Blouse</Text>
+                  )}
                 </View>
 
                 <View style={styles.sleeveHeader}>
