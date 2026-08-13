@@ -67,7 +67,6 @@ export default function JobOrdersPage() {
   const [workers, setWorkers] = useState([]);
   const [draftAssignedWorkers, setDraftAssignedWorkers] = useState([]);
   const [showDldBtn, setShowDldBtn] = useState(false);
-  const [hidePdfDownload, setHidePdfDownload] = useState(false);
 
   useEffect(() => {
     if (!authReady) return;
@@ -352,20 +351,6 @@ export default function JobOrdersPage() {
 
     if (isAdmin) loadWorkers();
   }, [isAdmin]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const v = window.localStorage.getItem("hidePdfDownload");
-    if (v === "true") setHidePdfDownload(true);
-  }, []);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    window.localStorage.setItem(
-      "hidePdfDownload",
-      hidePdfDownload ? "true" : "false",
-    );
-  }, [hidePdfDownload]);
 
   const toggleAssignWorker = (worker) => {
     const key = worker.docId || worker.id || worker.phone;
@@ -654,23 +639,39 @@ export default function JobOrdersPage() {
                       </div>
                       <div className="mb-4 d-flex flex-column flex-md-row justify-content-end align-items-center gap-3">
                         {showDldBtn ? (
+                          <button
+                            type="button"
+                            className="btn btn-outline-secondary mb-3 py-2"
+                            onClick={() => setShowDldBtn(!showDldBtn)}
+                          >
+                            Hide Invoice
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            className="btn btn-outline-primary mb-3 py-2"
+                            onClick={() => setShowDldBtn(true)}
+                          >
+                            Show Invoice
+                          </button>
+                        )}
+                        {showDldBtn && (
                           <PDFDownloadLink
                             document={<JobOrderPDF order={selectedOrder} />}
                             fileName={`Order Invoice.pdf`}
                             style={{
                               textDecoration: "none",
-                              padding: "10px",
                               color: "#fff",
                               backgroundColor: "navy",
                               border: "1px solid #4a4a4a",
                               borderRadius: 10,
-                              margin: 10,
                             }}
-                            onClick={() => {
+                            className="btn btn-primary mb-3 py-2"
+                            onClick={() =>
                               setTimeout(() => {
                                 setShowDldBtn(false);
-                              }, 1000);
-                            }}
+                              }, 500)
+                            }
                           >
                             {({ blob, url, loading, error }) =>
                               loading
@@ -678,14 +679,6 @@ export default function JobOrdersPage() {
                                 : "Download Order Invoice PDF"
                             }
                           </PDFDownloadLink>
-                        ) : (
-                          <button
-                            type="button"
-                            className="btn btn-outline-primary mb-3"
-                            onClick={() => setShowDldBtn(!showDldBtn)}
-                          >
-                            Show Invoice
-                          </button>
                         )}
                       </div>
 

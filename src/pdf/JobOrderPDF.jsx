@@ -96,15 +96,113 @@ const styles = StyleSheet.create({
   customerArea: {
     width: "44%",
     borderRight: "1 solid #111",
+    flexDirection: "column",
+    height: "100%",
   },
 
   measurementArea: {
     width: "56%",
+    flexDirection: "column",
+    height: "100%",
   },
 
   customerTop: {
     height: 92,
+    flexDirection: "column",
+    flexShrink: 0,
+  },
+
+  /* First row: Job Order / Delivery / B.No. */
+  metaRow: {
+    height: 21,
     flexDirection: "row",
+    flexShrink: 0,
+  },
+
+  metaCell: {
+    borderRight: "1 solid #111",
+    borderBottom: "1 solid #111",
+    paddingHorizontal: 4,
+    justifyContent: "center",
+  },
+
+  metaJobLabel: {
+    width: "24%",
+  },
+
+  metaJobValue: {
+    width: "15%",
+  },
+
+  metaDeliveryLabel: {
+    width: "35%",
+  },
+
+  metaBillValue: {
+    width: "26%",
+    borderRight: 0,
+  },
+
+  /* Remaining customer information */
+  customerInfoBody: {
+    flex: 1,
+    flexDirection: "row",
+  },
+
+  logoBox: {
+    width: "24%",
+    borderRight: "1 solid #111",
+    borderBottom: "1 solid #111",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 5,
+  },
+
+  logo: {
+    width: 62,
+    height: 62,
+    objectFit: "contain",
+  },
+
+  customerInfo: {
+    width: "76%",
+    flexDirection: "column",
+  },
+
+  customerInfoRow: {
+    flexDirection: "row",
+    height: 23.5,
+  },
+
+  customerInfoLabel: {
+    width: "18%",
+    borderRight: "1 solid #111",
+    borderBottom: "1 solid #111",
+    paddingHorizontal: 4,
+    justifyContent: "center",
+  },
+
+  customerInfoValue: {
+    width: "42%",
+    borderRight: "1 solid #111",
+    borderBottom: "1 solid #111",
+    paddingHorizontal: 4,
+    justifyContent: "center",
+  },
+
+  customerInfoLabelSmall: {
+    width: "18%",
+    borderRight: "1 solid #111",
+    borderBottom: "1 solid #111",
+    paddingHorizontal: 4,
+    justifyContent: "center",
+  },
+
+  customerInfoValueSmall: {
+    width: "22%",
+    borderBottom: "1 solid #111",
+    paddingHorizontal: 4,
+    justifyContent: "center",
   },
 
   logoBox: {
@@ -120,10 +218,6 @@ const styles = StyleSheet.create({
     width: 65,
     height: 65,
     objectFit: "contain",
-  },
-
-  customerInfo: {
-    width: "73%",
   },
 
   infoRow: {
@@ -644,115 +738,132 @@ export function JobOrderPDF({ order }) {
 
             <View style={styles.customerArea}>
               <View style={styles.customerTop}>
-                <View style={styles.logoBox}>
-                  <Image src={Logo.src} style={styles.logo} />
+                {/* ================================================================
+      ROW 1
+      Job Order No | Order No | Delivery Date | B.No.
+  ================================================================ */}
 
-                  <Text
-                    style={{
-                      textAlign: "center",
-                      fontSize: 9,
-                      fontWeight: "bold",
-                    }}
-                  >
-                    {SHOP_NAME}
-                  </Text>
+                <View style={styles.metaRow}>
+                  <View style={[styles.metaCell, styles.metaJobLabel]}>
+                    <Text>Job Order No</Text>
+                  </View>
+
+                  <View style={[styles.metaCell, styles.metaJobValue]}>
+                    <Text>{order?.orderNo || ""}</Text>
+                  </View>
+
+                  <View style={[styles.metaCell, styles.metaDeliveryLabel]}>
+                    <Text>Delivery Date</Text>
+                  </View>
+
+                  <View style={[styles.metaCell, styles.metaBillValue]}>
+                    <Text>{order?.deliveryDate || ""}</Text>
+                  </View>
                 </View>
 
-                <View style={styles.customerInfo}>
-                  {/* Job Order / Delivery / Bill */}
+                {/* ================================================================
+      CUSTOMER INFORMATION
+  ================================================================ */}
 
-                  <View style={styles.infoRow}>
-                    <View style={styles.infoLabel}>
-                      <Text>Job Order No</Text>
-                    </View>
+                <View style={styles.customerInfoBody}>
+                  {/* Logo */}
 
-                    <View style={styles.infoValue}>
-                      <Text>{order?.orderNo || ""}</Text>
-                    </View>
+                  <View style={styles.logoBox}>
+                    <Image src={Logo.src} style={styles.logo} />
 
-                    <View style={styles.infoLabel}>
-                      <Text>Delivery Date</Text>
-                    </View>
-
-                    <View
-                      style={[
-                        styles.infoValue,
-                        {
-                          width: "40%",
-                        },
-                      ]}
+                    <Text
+                      style={{
+                        textAlign: "center",
+                        fontSize: 8,
+                        fontWeight: "bold",
+                      }}
                     >
-                      <Text>{order?.deliveryDate || ""}</Text>
-                    </View>
+                      {SHOP_NAME}
+                    </Text>
                   </View>
 
-                  {/* Name / Phone */}
+                  {/* Information */}
 
-                  <View style={styles.infoRow}>
-                    <View style={styles.infoLabel}>
-                      <Text>Name</Text>
+                  <View style={styles.customerInfo}>
+                    {/* ------------------------------------------------------------
+          NAME + PHONE
+      ------------------------------------------------------------ */}
+
+                    <View style={styles.customerInfoRow}>
+                      <View style={styles.customerInfoLabel}>
+                        <Text>Name</Text>
+                      </View>
+
+                      <View style={styles.customerInfoValue}>
+                        <Text>
+                          {customer?.name || order?.customerName || ""}
+                        </Text>
+                      </View>
+
+                      <View style={styles.customerInfoLabelSmall}>
+                        <Text>
+                          Phone{"\n"}
+                          Number
+                        </Text>
+                      </View>
+
+                      <View style={styles.customerInfoValueSmall}>
+                        <Text>
+                          {customer?.phone || order?.customerPhone || ""}
+                        </Text>
+                      </View>
                     </View>
 
-                    <View style={styles.infoValue}>
-                      <Text>{customer?.name || order?.customerName || ""}</Text>
+                    {/* ------------------------------------------------------------
+          ADDRESS + CUSTOMER ID
+      ------------------------------------------------------------ */}
+
+                    <View style={styles.customerInfoRow}>
+                      <View style={styles.customerInfoLabel}>
+                        <Text>Address:</Text>
+                      </View>
+
+                      <View style={styles.customerInfoValue}>
+                        <Text>
+                          {customer?.address || order?.customerAddress || ""}
+                        </Text>
+                      </View>
+
+                      <View style={styles.customerInfoLabelSmall}>
+                        <Text>Customer Id</Text>
+                      </View>
+
+                      <View style={styles.customerInfoValueSmall}>
+                        <Text>
+                          {order?.customerId ||
+                            customer?.phone ||
+                            order?.customerPhone ||
+                            ""}
+                        </Text>
+                      </View>
                     </View>
 
-                    <View style={styles.infoLabel}>
-                      <Text>Phone Number</Text>
-                    </View>
+                    {/* ------------------------------------------------------------
+          EXTRA ROW
+          Keeps the lower customer information aligned with original
+      ------------------------------------------------------------ */}
 
-                    <View
-                      style={[
-                        styles.infoValue,
-                        {
-                          width: "40%",
-                        },
-                      ]}
-                    >
-                      <Text>
-                        {customer?.phone || order?.customerPhone || ""}
-                      </Text>
-                    </View>
-                  </View>
+                    <View style={styles.customerInfoRow}>
+                      <View style={styles.customerInfoLabel}>
+                        <Text></Text>
+                      </View>
 
-                  {/* Address */}
+                      <View style={styles.customerInfoValue}>
+                        <Text></Text>
+                      </View>
 
-                  <View style={styles.infoRow}>
-                    <View style={styles.addressLabel}>
-                      <Text>Address:</Text>
-                    </View>
+                      <View style={styles.customerInfoLabelSmall}>
+                        <Text></Text>
+                      </View>
 
-                    <View style={styles.addressValue}>
-                      <Text>
-                        {customer?.address || order?.customerAddress || ""}
-                      </Text>
-                    </View>
-                  </View>
-
-                  {/* Customer ID */}
-
-                  <View style={styles.infoRow}>
-                    <View style={styles.infoLabel}>
-                      <Text>Customer Id</Text>
-                    </View>
-
-                    <View style={styles.infoValue}>
-                      <Text>{order?.customerId || customer?.phone || ""}</Text>
-                    </View>
-
-                    <View style={styles.infoLabel}>
-                      <Text>B.No.</Text>
-                    </View>
-
-                    <View
-                      style={[
-                        styles.infoValue,
-                        {
-                          width: "40%",
-                        },
-                      ]}
-                    >
-                      <Text>{order?.billNo || ""}</Text>
+                      <View style={styles.customerInfoValueSmall}>
+                        <Text></Text>
+                      </View>
                     </View>
                   </View>
                 </View>
@@ -998,7 +1109,6 @@ export function JobOrderPDF({ order }) {
 
               <View style={styles.measurementHeader}>
                 <View style={styles.kurtaHeader}>
-                  <Text>Kurta / Blouse</Text>
                   {order?.pieceType === "Kurti" ? (
                     <Text>Kurti</Text>
                   ) : (
