@@ -11,7 +11,7 @@ import {
   pdf,
   PDFViewer,
 } from "@react-pdf/renderer";
-import Logo from "@/../public/assets/images/tlmtinvlogo.png";
+import Logo from "../images/tlmtinvlogo.png";
 import { SHOP_NAME, SHORT_SHOP_NAME } from "../modules/constants";
 const width = 2480;
 const height = 3508;
