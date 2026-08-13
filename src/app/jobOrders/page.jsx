@@ -19,6 +19,7 @@ import { useGlobalContext } from "@/context/Store";
 import DesignSketch from "@/app/newOrder/components/DesignSketch";
 import { upsertOrderAccountEntry } from "@/lib/accounts";
 import { JobOrderPDF } from "../../pdf/JobOrderPDF";
+import dynamic from "next/dynamic";
 const statusOptions = [
   "Pending",
   "Cutting",
@@ -48,7 +49,7 @@ export default function JobOrdersPage() {
     {
       ssr: false,
       loading: () => <p>Loading...</p>,
-    }
+    },
   );
   const router = useRouter();
   const { state } = useGlobalContext();
