@@ -18,8 +18,6 @@ import { firestore, storage } from "@/lib/firebase";
 import { useGlobalContext } from "@/context/Store";
 import DesignSketch from "@/app/newOrder/components/DesignSketch";
 import { upsertOrderAccountEntry } from "@/lib/accounts";
-import OrderInvoice from "@/pdf/OrderInvoice";
-import { PDFDownloadLink } from "@react-pdf/renderer";
 import { JobOrderPDF } from "../../pdf/JobOrderPDF";
 const statusOptions = [
   "Pending",
@@ -45,6 +43,13 @@ const formatRupee = (value) => {
 };
 
 export default function JobOrdersPage() {
+  const PDFDownloadLink = dynamic(
+    () => import("@react-pdf/renderer").then((mod) => mod.PDFDownloadLink),
+    {
+      ssr: false,
+      loading: () => <p>Loading...</p>,
+    }
+  );
   const router = useRouter();
   const { state } = useGlobalContext();
   const authReady = Boolean(state?.authReady);
