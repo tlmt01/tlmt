@@ -18,7 +18,9 @@ import { firestore, storage } from "@/lib/firebase";
 import { useGlobalContext } from "@/context/Store";
 import DesignSketch from "@/app/newOrder/components/DesignSketch";
 import { upsertOrderAccountEntry } from "@/lib/accounts";
-
+import OrderInvoice from "@/pdf/OrderInvoice";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import { JobOrderPDF } from "../../pdf/JobOrderPDF";
 const statusOptions = [
   "Pending",
   "Cutting",
@@ -58,6 +60,8 @@ export default function JobOrdersPage() {
   const [editingSketchUrl, setEditingSketchUrl] = useState("");
   const [workers, setWorkers] = useState([]);
   const [draftAssignedWorkers, setDraftAssignedWorkers] = useState([]);
+  const [showDldBtn, setShowDldBtn] = useState(false);
+  const [hidePdfDownload, setHidePdfDownload] = useState(false);
 
   useEffect(() => {
     if (!authReady) return;
@@ -343,6 +347,20 @@ export default function JobOrdersPage() {
     if (isAdmin) loadWorkers();
   }, [isAdmin]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const v = window.localStorage.getItem("hidePdfDownload");
+    if (v === "true") setHidePdfDownload(true);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(
+      "hidePdfDownload",
+      hidePdfDownload ? "true" : "false",
+    );
+  }, [hidePdfDownload]);
+
   const toggleAssignWorker = (worker) => {
     const key = worker.docId || worker.id || worker.phone;
     const exists = draftAssignedWorkers.find(
@@ -627,6 +645,42 @@ export default function JobOrdersPage() {
                             }
                           />
                         </div>
+                      </div>
+                      <div className="mb-4 d-flex flex-column flex-md-row justify-content-end align-items-center gap-3">
+                        {showDldBtn ? (
+                          <PDFDownloadLink
+                            document={<JobOrderPDF order={selectedOrder} />}
+                            fileName={`Order Invoice.pdf`}
+                            style={{
+                              textDecoration: "none",
+                              padding: "10px",
+                              color: "#fff",
+                              backgroundColor: "navy",
+                              border: "1px solid #4a4a4a",
+                              borderRadius: 10,
+                              margin: 10,
+                            }}
+                            onClick={() => {
+                              setTimeout(() => {
+                                setShowDldBtn(false);
+                              }, 1000);
+                            }}
+                          >
+                            {({ blob, url, loading, error }) =>
+                              loading
+                                ? "Loading..."
+                                : "Download Order Invoice PDF"
+                            }
+                          </PDFDownloadLink>
+                        ) : (
+                          <button
+                            type="button"
+                            className="btn btn-outline-primary mb-3"
+                            onClick={() => setShowDldBtn(!showDldBtn)}
+                          >
+                            Show Invoice
+                          </button>
+                        )}
                       </div>
 
                       <div className="row g-4 mb-4">

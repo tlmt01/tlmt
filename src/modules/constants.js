@@ -1,5 +1,7 @@
 export const MOBILE = "+918105621013";
 export const EMAIL = "gotlmt01@gmail.com";
+export const SHOP_NAME = "The Little Mango Tree";
+export const SHORT_SHOP_NAME = "TLMT";
 export const ADDRESS =
   "Tlmt, near Saty Sai Hospital, Gate, Sompura, Bengaluru, Karnataka 562125";
 export const MAP_URL =
