@@ -1236,8 +1236,8 @@ export function JobOrderPDF({ order }) {
                 </View>
 
                 <View style={styles.neckFront}>
-                  {d.frontNeckImage ? (
-                    <Image src={d.frontNeckImage} style={styles.designImage} />
+                  {d.designSketchUrl ? (
+                    <Image src={d.designSketchUrl} style={styles.designImage} />
                   ) : d.neckFrontImage ? (
                     <Image src={d.neckFrontImage} style={styles.designImage} />
                   ) : (
