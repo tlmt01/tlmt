@@ -218,49 +218,38 @@ const styles = StyleSheet.create({
   customerRow: {
     flexDirection: "row",
     height: 20,
+    borderTop: BORDER,
   },
 
   customerLabel: {
     width: "15%",
-
     borderRight: BORDER,
     borderBottom: BORDER,
-
     paddingHorizontal: 4,
-
     justifyContent: "center",
   },
 
   customerValue: {
     width: "39%",
-
     borderRight: BORDER,
     borderBottom: BORDER,
-
     paddingHorizontal: 4,
-
     justifyContent: "center",
   },
 
   phoneLabel: {
     width: "23%",
-
     borderRight: BORDER,
     borderBottom: BORDER,
-
     paddingHorizontal: 4,
-
     justifyContent: "center",
   },
 
   phoneValue: {
     width: "23%",
-
     borderRight: BORDER,
     borderBottom: BORDER,
-
     paddingHorizontal: 4,
-
     justifyContent: "center",
   },
 
@@ -725,6 +714,10 @@ export function InvoicePDF({ order = {} }) {
           {/* ==========================================================
               CUSTOMER
           ========================================================== */}
+
+          {/* ==========================================================
+    CUSTOMER
+========================================================== */}
 
           <View style={styles.customerRow}>
             <View style={styles.customerLabel}>
