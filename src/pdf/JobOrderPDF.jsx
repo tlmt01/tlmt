@@ -1333,16 +1333,19 @@ export function JobOrderPDF({ order = {} }) {
                 <View style={styles.neckFront}>
                   {design.frontNeckImage ? (
                     <Image
-                      src={design.frontNeckImage}
-                      style={styles.designImage}
+                      src={design.frontNeckImage.src}
+                      style={styles.designImage.src}
                     />
                   ) : design.neckFrontImage ? (
                     <Image
-                      src={design.neckFrontImage}
-                      style={styles.designImage}
+                      src={design.neckFrontImage.src}
+                      style={styles.designImage.src}
                     />
                   ) : designSketch ? (
-                    <Image src={designSketch} style={styles.designImage} />
+                    <Image
+                      src={designSketch.src}
+                      style={styles.designImage.src}
+                    />
                   ) : (
                     <Text>{design.frontNeck || design.neckFront || ""}</Text>
                   )}
@@ -1371,16 +1374,19 @@ export function JobOrderPDF({ order = {} }) {
                 <View style={styles.neckBack}>
                   {design.backNeckImage ? (
                     <Image
-                      src={design.backNeckImage}
-                      style={styles.designImage}
+                      src={design.backNeckImage.src}
+                      style={styles.designImage.src}
                     />
                   ) : design.neckBackImage ? (
                     <Image
-                      src={design.neckBackImage}
-                      style={styles.designImage}
+                      src={design.neckBackImage.src}
+                      style={styles.designImage.src}
                     />
                   ) : designSketch ? (
-                    <Image src={designSketch} style={styles.designImage} />
+                    <Image
+                      src={designSketch.src}
+                      style={styles.designImage.src}
+                    />
                   ) : (
                     <Text>{design.backNeck || design.neckBack || ""}</Text>
                   )}
@@ -1391,11 +1397,14 @@ export function JobOrderPDF({ order = {} }) {
                 <View style={styles.swatch}>
                   {design.swatchImage ? (
                     <Image
-                      src={design.swatchImage}
-                      style={styles.designImage}
+                      src={design.swatchImage.src}
+                      style={styles.designImage.src}
                     />
                   ) : design.swatchUrl ? (
-                    <Image src={design.swatchUrl} style={styles.designImage} />
+                    <Image
+                      src={design.swatchUrl}
+                      style={styles.designImage.src}
+                    />
                   ) : (
                     <Text>Swatch</Text>
                   )}

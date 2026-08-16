@@ -12,6 +12,7 @@ import {
   getDocs,
   query,
   where,
+  runTransaction,
 } from "firebase/firestore";
 import { getDownloadURL, ref, uploadString } from "firebase/storage";
 
@@ -30,7 +31,7 @@ interface Worker {
   phone?: string;
   name?: string;
   empid?: string;
-  [key: string]: any;
+  [key: string]: string | number | boolean | undefined;
 }
 
 export default function NewJobOrder() {
@@ -81,8 +82,35 @@ export default function NewJobOrder() {
     setDesignSketchUrl("");
   };
 
-  const generateOrderNo = () => {
-    return "JO" + Date.now().toString().slice(-6);
+  const generateOrderNo = async () => {
+    const today = new Date();
+    const dateKey = today
+      .toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      })
+      .replace(/\//g, "");
+    const counterRef = doc(firestore, "counters", "jobOrderCounter");
+
+    return await runTransaction(firestore, async (transaction) => {
+      const counterSnap = await transaction.get(counterRef);
+      const current = Number(counterSnap.data()?.current || 0);
+      const next = current + 1;
+      const serial = String(next).padStart(4, "0");
+
+      transaction.set(
+        counterRef,
+        {
+          current: next,
+          lastUpdatedAt: serverTimestamp(),
+          dateKey,
+        },
+        { merge: true },
+      );
+
+      return `JO-${dateKey}-${serial}`;
+    });
   };
 
   const saveCustomer = async () => {
@@ -135,7 +163,7 @@ export default function NewJobOrder() {
     try {
       setLoading(true);
 
-      const orderNo = orderInfo.orderNo || generateOrderNo();
+      const orderNo = orderInfo.orderNo || (await generateOrderNo());
 
       const docRef = await addDoc(collection(firestore, "jobOrders"), {
         customer,
@@ -235,9 +263,6 @@ export default function NewJobOrder() {
       setAssignedWorkers((cur) => [...cur, worker]);
     }
   };
-
-  const title =
-    pieceType === "Blouse" ? "Blouse Measurements" : "Kurti Measurements";
 
   return (
     <div className="container-fluid py-4">
