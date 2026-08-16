@@ -1423,7 +1423,7 @@ export async function downloadJobOrderPDF(order) {
 
     link.href = url;
 
-    link.download = `${order?.orderNo || "Job-Order"}.pdf`;
+    link.download = `Job Order ${order?.orderNo || "Job-Order"}.pdf`;
 
     document.body.appendChild(link);
 

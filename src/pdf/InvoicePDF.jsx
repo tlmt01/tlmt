@@ -918,7 +918,7 @@ export async function downloadInvoicePDF(order) {
 
     link.href = url;
 
-    link.download = `${order?.orderNo || "Invoice"}.pdf`;
+    link.download = `Invoice ${order?.orderNo || "Invoice"}.pdf`;
 
     document.body.appendChild(link);
 
