@@ -18,8 +18,12 @@ import { firestore, storage } from "@/lib/firebase";
 import { useGlobalContext } from "@/context/Store";
 import DesignSketch from "@/app/newOrder/components/DesignSketch";
 import { upsertOrderAccountEntry } from "@/lib/accounts";
-import { JobOrderPDF } from "../../pdf/JobOrderPDF";
 import dynamic from "next/dynamic";
+import { JobOrderPDF } from "../../pdf/JobOrderPDF";
+import JobOrderPDFDownloadButton from "../../pdf/JobOrderPDF";
+import { InvoicePDF } from "../../pdf/InvoicePDF";
+import InvoicePDFDownloadButton from "../../pdf/InvoicePDF";
+import { formatDate } from "../../modules/calculatefunctions";
 const statusOptions = [
   "Pending",
   "Cutting",
@@ -66,7 +70,8 @@ export default function JobOrdersPage() {
   const [editingSketchUrl, setEditingSketchUrl] = useState("");
   const [workers, setWorkers] = useState([]);
   const [draftAssignedWorkers, setDraftAssignedWorkers] = useState([]);
-  const [showDldBtn, setShowDldBtn] = useState(false);
+  const [showJobOrderDldBtn, setShowJobOrderDldBtn] = useState(false);
+  const [showInvoiceDldBtn, setShowInvoiceDldBtn] = useState(false);
 
   useEffect(() => {
     if (!authReady) return;
@@ -502,7 +507,7 @@ export default function JobOrdersPage() {
                           </div>
                           <div className="small text-muted mt-2">
                             {order.customer?.phone || "No phone"} ·{" "}
-                            {renderValue(order.deliveryDate)}
+                            {renderValue(formatDate(order.deliveryDate))}
                           </div>
                         </button>
                       );
@@ -637,12 +642,60 @@ export default function JobOrdersPage() {
                           />
                         </div>
                       </div>
-                      <div className="mb-4 d-flex flex-column flex-md-row justify-content-end align-items-center gap-3">
-                        {showDldBtn ? (
+                      {/* <div className="mb-4 d-flex flex-column flex-md-row justify-content-end align-items-center gap-3">
+                        {showJobOrderDldBtn ? (
                           <button
                             type="button"
                             className="btn btn-outline-secondary mb-3 py-2"
-                            onClick={() => setShowDldBtn(!showDldBtn)}
+                            onClick={() =>
+                              setShowJobOrderDldBtn(!showJobOrderDldBtn)
+                            }
+                          >
+                            Hide Job Order Invoice
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            className="btn btn-outline-primary mb-3 py-2"
+                            onClick={() => setShowJobOrderDldBtn(true)}
+                          >
+                            Show Job Order Invoice
+                          </button>
+                        )}
+                        {showJobOrderDldBtn && (
+                          <PDFDownloadLink
+                            document={<JobOrderPDF order={selectedOrder} />}
+                            fileName={`Job Order Invoice.pdf`}
+                            style={{
+                              textDecoration: "none",
+                              color: "#fff",
+                              backgroundColor: "navy",
+                              border: "1px solid #4a4a4a",
+                              borderRadius: 10,
+                            }}
+                            className="btn btn-primary mb-3 py-2"
+                            onClick={() =>
+                              setTimeout(() => {
+                                setShowJobOrderDldBtn(false);
+                              }, 500)
+                            }
+                          >
+                            {({ blob, url, loading, error }) =>
+                              loading
+                                ? "Loading..."
+                                : "Download Order Invoice PDF"
+                            }
+                          </PDFDownloadLink>
+                        )}
+                      </div>
+                      <div className="mb-4 d-flex flex-column flex-md-row justify-content-end align-items-center gap-3">
+                        {showInvoiceDldBtn ? (
+                          <button
+                            type="button"
+                            className="btn btn-outline-secondary mb-3 py-2"
+                            onClick={() =>
+                              setShowInvoiceDldBtn(!showInvoiceDldBtn)
+                            }
                           >
                             Hide Invoice
                           </button>
@@ -650,14 +703,14 @@ export default function JobOrdersPage() {
                           <button
                             type="button"
                             className="btn btn-outline-primary mb-3 py-2"
-                            onClick={() => setShowDldBtn(true)}
+                            onClick={() => setShowInvoiceDldBtn(true)}
                           >
                             Show Invoice
                           </button>
                         )}
-                        {showDldBtn && (
+                        {showInvoiceDldBtn && (
                           <PDFDownloadLink
-                            document={<JobOrderPDF order={selectedOrder} />}
+                            document={<InvoicePDF order={selectedOrder} />}
                             fileName={`Order Invoice.pdf`}
                             style={{
                               textDecoration: "none",
@@ -669,7 +722,7 @@ export default function JobOrdersPage() {
                             className="btn btn-primary mb-3 py-2"
                             onClick={() =>
                               setTimeout(() => {
-                                setShowDldBtn(false);
+                                setShowInvoiceDldBtn(false);
                               }, 500)
                             }
                           >
@@ -680,6 +733,10 @@ export default function JobOrdersPage() {
                             }
                           </PDFDownloadLink>
                         )}
+                      </div> */}
+                      <div className="mb-4 d-flex flex-row flex-md-row justify-content-end align-items-center gap-3">
+                        <JobOrderPDFDownloadButton order={selectedOrder} />
+                        <InvoicePDFDownloadButton order={selectedOrder} />
                       </div>
 
                       <div className="row g-4 mb-4">
@@ -748,11 +805,16 @@ export default function JobOrdersPage() {
                               <strong>Order summary</strong>
                             </div>
                             <p className="mb-1">
-                              Booking: {renderValue(selectedOrder.bookingDate)}
+                              Booking:{" "}
+                              {renderValue(
+                                formatDate(selectedOrder.bookingDate),
+                              )}
                             </p>
                             <p className="mb-1">
                               Delivery:{" "}
-                              {renderValue(selectedOrder.deliveryDate)}
+                              {renderValue(
+                                formatDate(selectedOrder.deliveryDate),
+                              )}
                             </p>
                             <p className="mb-1">
                               Status: {selectedOrder.status}
