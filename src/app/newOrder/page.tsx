@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import {
   collection,
-  addDoc,
   serverTimestamp,
   doc,
   getDoc,
@@ -165,7 +164,7 @@ export default function NewJobOrder() {
 
       const orderNo = orderInfo.orderNo || (await generateOrderNo());
 
-      const docRef = await addDoc(collection(firestore, "jobOrders"), {
+      await setDoc(doc(firestore, "jobOrders", orderNo), {
         customer,
         pieceType,
         measurements,
@@ -197,19 +196,16 @@ export default function NewJobOrder() {
       });
 
       if (designSketchUrl) {
-        const imageRef = ref(
-          storage,
-          `jobOrders/${docRef.id}/design-sketch.png`,
-        );
+        const imageRef = ref(storage, `jobOrders/${orderNo}/design-sketch.png`);
         await uploadString(imageRef, designSketchUrl, "data_url");
         const savedUrl = await getDownloadURL(imageRef);
-        await updateDoc(doc(firestore, "jobOrders", docRef.id), {
+        await updateDoc(doc(firestore, "jobOrders", orderNo), {
           designSketchUrl: savedUrl,
         });
       }
 
       await upsertOrderAccountEntry({
-        docId: docRef.id,
+        docId: orderNo,
         orderNo,
         bookingDate: orderInfo.bookingDate,
         deliveryDate: orderInfo.deliveryDate,

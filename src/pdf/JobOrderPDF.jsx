@@ -1331,20 +1331,17 @@ export function JobOrderPDF({ order = {} }) {
                 {/* FRONT NECK DESIGN */}
 
                 <View style={styles.neckFront}>
-                  {design.frontNeckImage ? (
-                    <Image
-                      src={design.frontNeckImage.src}
-                      style={styles.designImage.src}
-                    />
+                  {designSketch ? (
+                    <Image src={designSketch.src} style={styles.designImage} />
                   ) : design.neckFrontImage ? (
                     <Image
                       src={design.neckFrontImage.src}
-                      style={styles.designImage.src}
+                      style={styles.designImage}
                     />
-                  ) : designSketch ? (
+                  ) : design.frontNeckImage ? (
                     <Image
-                      src={designSketch.src}
-                      style={styles.designImage.src}
+                      src={design.frontNeckImage.src}
+                      style={styles.designImage}
                     />
                   ) : (
                     <Text>{design.frontNeck || design.neckFront || ""}</Text>
@@ -1375,17 +1372,12 @@ export function JobOrderPDF({ order = {} }) {
                   {design.backNeckImage ? (
                     <Image
                       src={design.backNeckImage.src}
-                      style={styles.designImage.src}
+                      style={styles.designImage}
                     />
                   ) : design.neckBackImage ? (
                     <Image
                       src={design.neckBackImage.src}
-                      style={styles.designImage.src}
-                    />
-                  ) : designSketch ? (
-                    <Image
-                      src={designSketch.src}
-                      style={styles.designImage.src}
+                      style={styles.designImage}
                     />
                   ) : (
                     <Text>{design.backNeck || design.neckBack || ""}</Text>
