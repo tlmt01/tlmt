@@ -627,7 +627,7 @@ const styles = StyleSheet.create({
 
   designImage: {
     maxWidth: "100%",
-    maxHeight: 90,
+    maxHeight: "100%",
     objectFit: "contain",
   },
 });
@@ -1332,7 +1332,7 @@ export function JobOrderPDF({ order = {} }) {
 
                 <View style={styles.neckFront}>
                   {designSketch ? (
-                    <Image src={designSketch.src} style={styles.designImage} />
+                    <Image src={designSketch} style={styles.designImage} />
                   ) : design.neckFrontImage ? (
                     <Image
                       src={design.neckFrontImage.src}
