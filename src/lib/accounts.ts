@@ -11,7 +11,9 @@ export type AccountEntry = {
   id: string;
   description: string;
   amount: number;
+  customerName: string;
   type: "income" | "expense";
+  pieceType?: string;
   category: string;
   date: string;
   source: string;
@@ -39,6 +41,8 @@ export async function saveAccountEntry(
     source: entry?.source || "manual",
     orderNo: entry?.orderNo || "",
     orderId: entry?.orderId || "",
+    customerName: entry?.customerName || "Unknown",
+    pieceType: entry?.pieceType || "",
     status: entry?.status || "",
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
@@ -84,6 +88,8 @@ export async function upsertOrderAccountEntry(
     status: order?.status || "Pending",
     advance,
     due,
+    customerName: order?.customer?.name || "Unknown",
+    pieceType: order?.pieceType || "",
     totalAmount,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),

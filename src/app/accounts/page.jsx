@@ -15,6 +15,7 @@ import { firestore } from "@/lib/firebase";
 import { useGlobalContext } from "../../context/Store";
 import { importJobOrdersToAccounts, saveAccountEntry } from "@/lib/accounts";
 import styles from "./accounts.module.css";
+import { formatDate } from "../../modules/calculatefunctions.js";
 
 function formatCurrency(value) {
   return new Intl.NumberFormat("en-IN", {
@@ -333,7 +334,9 @@ export default function AccountsPage() {
                   <div>
                     <strong>{entry.description}</strong>
                     <span>
-                      {entry.category} • {entry.date}
+                      {entry.category} • {formatDate(entry.date)} •{" "}
+                      {entry.customerName || "Unknown"} •{" "}
+                      {entry.pieceType || "N/A"}
                     </span>
                     {entry.source === "jobOrder" ? (
                       <div className={styles.orderMeta}>
